@@ -1,0 +1,649 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="Jozef Dvorský - creatingo.com">
+
+	<title>Smart Room</title>
+
+	<!-- Bootstrap core CSS with custom theme variables + Additional theme styles -->
+    <link href="../assets/css/iot-theme-bundle.min.css" rel="stylesheet">
+    <!-- <link href="../assets/fontawesome/css/all.css" rel="stylesheet"> -->
+    <link href="../assets/fontawesomepro/css/all.css" rel="stylesheet">
+    <!-- <script defer src="../assets/fontawesomepro/js/pro.min.js"></script>
+    <script defer src="../assets/fontawesomepro/js/free.min.js"></script> -->
+	<link href="../assets/css/style.css" rel="stylesheet">
+
+    <style>
+        .icon-sprite{
+            text-align: center;
+        }
+
+        .icon-sprite > svg,.icon-sprite > span{
+            display: block;
+            font-size: 2rem;
+            line-height:normal;
+        }
+        .icon-sprite.icon-1x > svg,.icon-sprite.icon-1x > span{
+            display: block;
+            font-size: 2rem;
+            line-height:normal;
+        }
+        .icon-sprite.icon-2x > svg,.icon-sprite.icon-2x > span{
+            display: block;
+            font-size: 3rem;
+            line-height:normal;
+        }
+		input[type=text]{
+			font-size: 1.8rem;
+			padding: 5px
+		}
+		input[type=text]:focus{
+			outline-color: #0f9ce6;
+			outline: none;
+		}
+
+		.correct{
+			border: 1px solid #59ac4a;
+    		box-shadow: inset 0 0 25px #59ac4a;
+		}
+
+		.wrong{
+			border: 1px solid #dd004a;
+    		box-shadow: inset 0 0 25px #dd004a
+		}
+    </style>
+</head>
+
+<body>
+
+	<!-- Preloader -->
+	<div id="iot-preloader">
+		<div class="center-preloader d-flex align-items-center">
+			<div class="spinners">
+				<div class="spinner01"></div>
+				<div class="spinner02"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Wrapper START -->
+	<div id="wrapper" class="hidden">
+		<!-- Top navbar START -->
+		<nav class="navbar navbar-expand fixed-top d-flex flex-row justify-content-start">
+			<div class="d-none d-lg-block">
+				<form>
+					<div id="menu-minifier">
+						<label>
+							<svg width="32" height="32" viewBox="0 0 32 32">
+								<rect x="2" y="8" width="4" height="3" class="menu-dots"></rect>
+								<rect x="2" y="15" width="4" height="3" class="menu-dots"></rect>
+								<rect x="2" y="22" width="4" height="3" class="menu-dots"></rect>
+								<rect x="8" y="8" width="21" height="3" class="menu-lines"></rect>
+								<rect x="8" y="15" width="21" height="3" class="menu-lines"></rect>
+								<rect x="8" y="22" width="21" height="3" class="menu-lines"></rect>
+							</svg>
+							<input id="minifier" type="checkbox"> 
+						</label>
+						<div class="info-holder info-rb">
+							<div data-toggle="popover-all" data-content="Checkbox element using localStorage to remember the last status." data-original-title="Side menu narrowing" data-placement="right"></div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<a class="navbar-brand px-lg-3 px-1 mr-0" href="#">Smart Room</a>
+			<div class="ml-auto">
+				<div class="navbar-nav flex-row navbar-icons">
+					<div class="nav-item d-lg-none">
+						<button id="sidebar-toggler" type="button" class="btn btn-link nav-link" data-toggle="offcanvas">
+						<div class="icon-sprite">
+                            <span class="fas fa-bars"></span>
+                        </div>
+						</button>
+					</div>
+				</div>
+			</div>
+		</nav>
+		<!-- Top navbar END -->
+		<!-- wrapper-offcanvas START -->
+		<div class="wrapper-offcanvas">
+			<!-- row-offcanvas START -->
+			<div class="row-offcanvas row-offcanvas-left">
+				<!-- Side menu START -->
+				<div id="sidebar" class="sidebar-offcanvas">
+					<ul class="nav flex-column nav-sidebar">
+						<li class="nav-item active">
+							<a class="nav-link" href="index.html">
+								<div class="icon-sprite">
+                                    <i class="far fa-home"></i>
+                                </div>
+                                Home
+							</a>
+						</li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="simulator.html">
+                                <div class="icon-sprite">
+                                    <i class="far fa-keyboard"></i>
+                                </div>
+                                Simulator
+                            </a>
+                        </li>
+					</ul>
+				</div>
+				<!-- Side menu END -->
+				<!-- Main content START -->
+				<div id="main">
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-sm-12 col-md-12">
+								<div class="card" data-unit="door-nfc">
+									<ul class="list-group borderless">
+									  <li class="list-group-item align-items-center">
+										  <div class="icon-sprite icon-1x d-table">
+											  <span class="far fa-house-signal d-table-cell align-middle bright"></span>
+										  </div>
+										<h5>NFC Sensor</h5>
+									  </li>
+									</ul>
+									<hr class="my-0">
+									<div class="d-flex justify-content-between">
+									  <ul class="list-group borderless px-1 align-items-stretch w-100">
+										<li class="list-group-item">
+										  <p class="specs mr-auto mb-auto">Data Read</p>
+										</li>
+										<li class="list-group-item d-flex flex-column pb-4 w-100">
+										  <p class="mr-auto mt-2 mb-0 w-100">
+											  <input type="text" id="door-nfc" class="card d-inline-block" style="color: #aee0fa;"/>
+											  <button class="btn btn-secondary ml-2" id="door-nfc-btn">Scan</button>
+										  </p>										  
+										</li>
+									  </ul>
+									</div>
+								  </div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12 col-md-12">
+								<!-- room temperature  START -->
+								<div class="card temp-range" data-unit="room-temp">
+								  	<ul class="list-group borderless">
+										<li class="list-group-item align-items-center">
+											<div class="icon-sprite icon-1x d-table">
+												<span class="fas fa-thermometer-full d-table-cell align-middle bright"></span>
+											</div>
+									  		<h5>Temperature & Humidity</h5>
+										</li>
+								  	</ul>
+								  	<hr class="my-0">
+								  	<div class="d-flex justify-content-between" data-rangeslider="room-temp">
+										<ul class="list-group borderless px-1 align-items-stretch w-100">
+									  		<li class="list-group-item">
+												<p class="specs mr-auto mb-auto">Current temperature</p>
+									  		</li>
+									  		<li class="list-group-item d-flex flex-column pb-4">
+												<p class="mr-auto mt-2 mb-0 display-5">
+													<span id="room-temp-text">22</span><sup>°C</sup>
+												</p>
+												<input class="room-temp" id="room-temp" type="range" min="0" max="50" step="1">
+									  		</li>
+									  		<li class="list-group-item">
+												<p class="specs mr-auto mb-auto">Current humidity</p>
+									  		</li>
+									  		<li class="list-group-item d-flex flex-column pb-4">
+												<p class="mr-auto mt-2 mb-0 display-5">
+													<span id="room-hum-text">22%</span>
+												</p>
+												<input id="room-hum" class="room-hum" type="range" min="20" max="90" step="1">
+									  		</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12 col-md-6">
+								<div class="card light-range" data-unit="room-light">
+								  <ul class="list-group borderless">
+									<li class="list-group-item align-items-center">
+										<div class="icon-sprite icon-1x d-table">
+											<span class="far fa-lightbulb d-table-cell align-middle bright"></span>
+										</div>
+									  <h5>LDR Sensor</h5>
+									</li>
+								  </ul>
+								  <hr class="my-0">
+								  <div class="d-flex justify-content-between" data-rangeslider="room-light">
+									<ul class="list-group borderless px-1 align-items-stretch">
+									  <li class="list-group-item">
+										<p class="specs mr-auto mb-auto">Light Intensity</p>
+									  </li>
+									  <li class="list-group-item d-flex flex-column pb-4">
+										<p class="mr-auto mt-2 mb-0 display-5">
+											<span id="room-light-text">22</span>
+										</p>
+									  </li>
+									</ul>
+									<div class="p-4" style="position:relative;">
+									  <input id="room-light" class="room-light" type="range" min="0" max="1023" step="1" data-orientation="vertical">
+									</div>
+								  </div>
+								</div>
+							</div>
+							<div class="col-sm-12 col-md-6">
+								<div class="card door-switch" data-unit="room-door" style="min-height: 243px;">
+								  <ul class="list-group borderless">
+									<li class="list-group-item align-items-center">
+										<div class="icon-sprite icon-1x d-table">
+											<span class="far fa-door-closed d-table-cell align-middle bright"></span>
+										</div>
+									  <h5>Magnetic Switch</h5>
+									</li>
+								  </ul>
+								  <hr class="my-0">
+								  <div class="d-flex justify-content-between">
+									<ul class="list-group borderless px-1 align-items-stretch">
+									  <li class="list-group-item">
+										<p class="specs mr-auto mb-auto">Magnect Detect</p>
+									  </li>
+									  <li class="list-group-item d-flex flex-column pb-4">
+										<p class="mr-auto mt-2 mb-0 display-5">
+											<span class="room-door" id="door-text">True</span>
+										</p>
+									  </li>
+									</ul>
+									<div class="p-4" style="position:relative;">
+									  <label class="switch">
+										  <input type="checkbox" id="switch-magnetic-sensor" class="sensor-checkbox"/>  
+									  </label>
+									</div>
+								  </div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12 col-md-6">
+								<div class="card user-location" data-unit="user-location">
+								  <ul class="list-group borderless">
+									<li class="list-group-item align-items-center">
+										<div class="icon-sprite icon-1x d-table">
+											<span class="far fa-map-marker-alt d-table-cell align-middle bright"></span>
+										</div>
+									  <h5>User Location</h5>
+									</li>
+								  </ul>
+								  <hr class="my-0">
+								  <div class="d-flex justify-content-between w-100" id="currentMap" style="height:400px">
+								  </div>
+								</div>
+							</div>
+							<div class="col-sm-12 col-md-6">
+								<div class="card home-location" data-unit="home-location">
+								  <ul class="list-group borderless">
+									<li class="list-group-item align-items-center">
+										<div class="icon-sprite icon-1x d-table">
+											<span class="far fa-house-user d-table-cell align-middle bright"></span>
+										</div>
+									  <h5>Home Location</h5>
+									</li>
+								  </ul>
+								  <hr class="my-0">
+								  <div class="d-flex justify-content-between w-100" id="homeMap" style="height:400px">
+								  </div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- Main content overlay when side menu appears  -->
+					<div class="cover-offcanvas" data-toggle="offcanvas"></div>
+				</div>
+				<!-- Main content END -->
+			</div>
+			<!-- row-offcanvas END -->
+		</div>
+		<!-- wrapper-offcanvas END -->
+	</div>
+	<!-- Wrapper END -->
+
+	<!-- SVG assets - not visible -->
+	<svg id="svg-tool" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+      <style type="text/css">
+          .glow circle {fill:url(#radial-glow)}
+      </style>
+      <filter id="blur" x="-25%" y="-25%" width="150%" height="150%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+      </filter>
+      <radialGradient id="radial-glow" fx="50%" fy="50%" r="50%">
+          <stop offset="0" stop-color="#0F9CE6" stop-opacity="1"/>
+          <stop offset="1" stop-color="#0F9CE6" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+  </svg>
+
+	<!-- jQuery -->
+    <script src="../assets/js/jquery-3.4.1.min.js"></script>
+
+	<!-- Bootstrap bundle -->
+	<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+	<script src="../assets/js/iot-range-slider.min.js"></script>
+
+	<!-- Basic theme functionality (arming, garage doors, switches ...) - using jQuery -->
+	<script src="../assets/js/iot-functions.min.js"></script>
+
+	<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsi3wrZP6FncQZsaZ-MXJCraMDfCqSCX4"></script>
+
+	<script type="module">
+		import {initializeApp} from "https://www.gstatic.com/firebasejs/9.0.1/firebase-app.js";
+		import * as firebase from "https://www.gstatic.com/firebasejs/9.0.1/firebase-database.js";
+
+		$(document).ready(function() {
+
+			// Get checkbox statuses from localStorage if available (IE)
+			if (localStorage) {
+
+				// Menu minifier status (Contract/expand side menu on large screens)
+				var checkboxValue = localStorage.getItem('minifier');
+
+				if (checkboxValue === 'true') {
+					$('#sidebar,#menu-minifier').addClass('mini');
+					$('#minifier').prop('checked', true);
+
+				} else {
+
+					if ($('#minifier').is(':checked')) {
+						$('#sidebar,#menu-minifier').addClass('mini');
+						$('#minifier').prop('checked', true);
+					} else {
+						$('#sidebar,#menu-minifier').removeClass('mini');
+						$('#minifier').prop('checked', false);
+					}
+				}
+			}
+
+
+			// Contract/expand side menu on click. (only large screens)
+			$('#minifier').click(function() {
+
+				$('#sidebar,#menu-minifier').toggleClass('mini');
+
+				// Save side menu status to localStorage if available (IE)
+				if (localStorage) {
+					checkboxValue = this.checked;
+					localStorage.setItem('minifier', checkboxValue);
+				}
+
+			});
+
+
+			// Side menu toogler for medium and small screens
+			$('[data-toggle="offcanvas"]').click(function() {
+				$('.row-offcanvas').toggleClass('active');
+			});
+
+		});
+
+		// Apply necessary changes, functionality when content is loaded
+		$(window).on('load', function() {
+			// "Timeout" function is not neccessary - important is to hide the preloader overlay
+
+			const firebaseConfig = {
+				apiKey: "AIzaSyBsi3wrZP6FncQZsaZ-MXJCraMDfCqSCX4",
+				authDomain: "smart-room-d66b5.firebaseapp.com",
+				databaseURL: "https://smart-room-d66b5-default-rtdb.asia-southeast1.firebasedatabase.app",
+				projectId: "smart-room-d66b5",
+				storageBucket: "smart-room-d66b5.appspot.com",
+				messagingSenderId: "567793747402",
+				appId: "1:567793747402:web:6b5deb54ec7501dae9bb33"
+			};
+
+			// Initialize Firebase
+			const app = initializeApp(firebaseConfig);
+			
+			var dbRef = firebase.getDatabase();
+			const dhtSensor = firebase.query(firebase.ref(dbRef,"/dht_sensor/data"),firebase.orderByKey(),firebase.limitToLast(1))
+			firebase.onValue(dhtSensor,(snapshot) =>{
+				if(snapshot.exists()){
+					snapshot.forEach(function(children){
+
+						console.log(children.val())
+						var data = children.val()
+						var temp = data["temperature"]
+						var hum = data["humidity"]
+
+						console.log(temp)
+						$("#room-hum").val(hum).change()
+						$("#room-temp").val(temp).change()
+						
+						$("#room-temp-text").text(temp)
+						$("#room-hum-text").text(hum)
+					});
+				}
+				else{
+					console.log("No data")
+				}
+			});
+
+			const lightSensor = firebase.ref(dbRef,"/light_sensor_001")
+			firebase.onValue(lightSensor,(snapshot) =>{
+				var brightness = snapshot.val()["brightness"]
+
+				$("#room-light").val(brightness).change()
+				$("#room-light-text").text(brightness)
+			})
+
+			const magneticSensor = firebase.ref(dbRef,"/magnetic_switch_door")
+			firebase.onValue(magneticSensor,(snapshot) =>{
+				var status = snapshot.val()["status"]
+
+				$("#switch-magnetic-sensor").prop("checked",status)
+				$("#door-text").text(status ? "True":"False")
+				if(!status){
+					$("#switch-magnetic-sensor").parent().removeClass("checked")
+				}
+				else{
+					$("#switch-magnetic-sensor").parent().addClass("checked")
+				}
+			})
+
+			$("#switch-magnetic-sensor").on('change',function(){
+				var status = $(this).prop("checked")
+				firebase.update(firebase.ref(dbRef,"/magnetic_switch_door"),{
+					"status":status
+				});
+			})
+
+			$("#room-temp").rangeslider({
+				polyfill: false,
+				onSlideEnd: function(position, value) {
+					var currentTime = Math.round(new Date().getTime()/1000)
+					var hum = $("#room-hum").val()
+
+					var obj = {}
+					obj.temperature = value
+					obj.humidity = +hum
+
+					firebase.update(firebase.ref(dbRef,"/dht_sensor/data/"+currentTime),obj)
+				},
+				onSlide:function(position,value){
+					$("#room-temp-text").text(value)
+				}
+			});
+
+			$("#room-hum").rangeslider({
+				polyfill: false,
+				onSlideEnd: function(position, value) {
+					var currentTime = Math.round(new Date().getTime()/1000)
+
+					var temp = $("#room-temp").val()
+
+					var obj = {}
+					obj.temperature = +temp
+					obj.humidity = value
+
+					firebase.update(firebase.ref(dbRef,"/dht_sensor/data/"+currentTime),obj)
+				},
+				onSlide:function(position,value){
+					$("#room-hum-text").text(value)
+				}
+			});
+
+			$("#room-light").rangeslider({
+				polyfill: false,
+				onSlideEnd: function(position, value) {
+					var currentTime = Math.round(new Date().getTime()/1000)
+
+					var obj = {}
+					obj.time_stamp = currentTime
+					obj.brightness = value
+
+					firebase.update(firebase.ref(dbRef,"/light_sensor_001"),obj)
+				},
+				onSlide:function(p,value){
+					$("#room-light-text").text(value)
+				}
+				
+			});
+			
+			$("#door-nfc-btn").on('click',function(){
+				var enteredValue = $("#door-nfc").val()
+				const nfcPassphrase = firebase.ref(dbRef,"/user/doorPassphrase")
+				firebase.get(nfcPassphrase).then((snapshot) =>{
+					if(snapshot.exists()){
+						var passphrase = snapshot.val()
+						if(passphrase == enteredValue){
+							$("#door-nfc").addClass("correct").removeClass("wrong")
+							firebase.update(firebase.ref(dbRef,"/solenoid_lock"),{
+								"status":false
+							});
+						}
+						else{
+							$("#door-nfc").addClass("wrong").removeClass("correct")
+						}
+					}
+				});
+			})
+
+			var currentMap = null
+			var currentMarker = null
+			const currentLocation = firebase.ref(dbRef,"/gps_sensor")
+			firebase.onValue(currentLocation,(snapshot)=>{
+				if(snapshot.exists()){
+					var data = snapshot.val()
+					var lat = data.latitude
+					var long = data.longitude
+					if(currentMap == null){
+						currentMap = new google.maps.Map(document.getElementById('currentMap'), {
+							center: {lat:lat, lng:long},
+							zoom: 15,
+							mapId:'fe2f32559a6a767d'
+						});
+
+						currentMarker = new google.maps.Marker({
+							position:{lat:lat, lng:long},
+							map: currentMap,
+							draggable:true,
+							animation: google.maps.Animation.DROP,
+						});
+
+						currentMarker.addListener("dragend",function(){
+							currentMarker.setAnimation(4)
+							
+							var obj = {}
+							obj.latitude = +currentMarker.position.lat().toFixed(6)
+							obj.longitude = +currentMarker.position.lng().toFixed(6)
+
+							firebase.update(firebase.ref(dbRef,"/gps_sensor"),obj)
+						})
+					}
+					else{
+						currentMap.panTo({lat:lat, lng:long})
+
+						currentMarker.setPosition({lat:lat, lng:long})
+					}
+				}
+			});
+
+			var homeMap = null
+			var homeMarker = null
+			const homeLocation = firebase.ref(dbRef,"/user/home")
+			firebase.onValue(homeLocation,(snapshot)=>{
+				if(snapshot.exists()){
+					var data = snapshot.val()
+					var lat = data.latitude
+					var long = data.longitude
+					if(homeMap == null){
+						homeMap = new google.maps.Map(document.getElementById('homeMap'), {
+							center: {lat:lat, lng:long},
+							zoom: 15,
+							mapId:'fe2f32559a6a767d'
+						});
+
+						homeMarker = new google.maps.Marker({
+							position:{lat:lat, lng:long},
+							map: homeMap,
+							draggable:true,
+							animation: google.maps.Animation.DROP,
+						});
+
+						homeMarker.addListener("dragend",function(){
+							homeMarker.setAnimation(4)
+							
+							var obj = {}
+							obj.latitude = +homeMarker.position.lat().toFixed(6)
+							obj.longitude = +homeMarker.position.lng().toFixed(6)
+
+							firebase.update(firebase.ref(dbRef,"/user/home"),obj)
+						})
+					}
+					else{
+						homeMap.panTo({lat:lat, lng:long})
+
+						homeMarker.setPosition({lat:lat, lng:long})
+					}
+				}
+			})
+
+
+			setTimeout(function() {
+
+				// Hide preloader overlay when content is loaded
+				$('#iot-preloader,.card-preloader').fadeOut();
+				$("#wrapper").removeClass("hidden");
+
+			}, 800);
+
+			// var map = new google.maps.Map(document.getElementById('map'), {
+			// 	center: {lat: -34.397, lng: 150.644},
+			// 	zoom: 8
+			// });
+		});
+
+		function toggleDrop(marker) {
+			if (marker.getAnimation() !== null) {
+				marker.setAnimation(null);
+			} else {
+				marker.setAnimation(google.maps.Animation.DROP);
+			}
+		}
+
+		// Apply necessary changes if window resized
+		$(window).on('resize', function() {
+
+			// Modal reposition when the window is resized
+			$('.modal.centered:visible').each(iot.centerModal);
+
+			// Check for Main contents scrollbar visibility and set right position for FAB button
+			iot.positionFab();
+		});
+
+	</script>
+
+</body>
+
+</html>
