@@ -1,0 +1,135 @@
+body {
+    padding: 2rem;
+    font-family: 'Just Another Hand', cursive;
+    background: #f3f3f3;
+}
+.block{
+    padding: 2rem;
+    display: inline-block;
+    border: 3px solid #333333;
+    border-radius: 2% 6% 5% 4% / 1% 1% 2% 4%;
+    letter-spacing: 0.3ch;
+    background: #ffffff;
+    position: relative;
+    width: 40%;
+    margin-left: 30%;
+}
+
+.top{
+    border-bottom: 2px solid #333333;
+    height: auto;
+    font-size: 2rem;
+}
+
+.list-content{
+    height:auto;
+    width:80%;
+    border-radius: 10px;
+    box-shadow: 0 5px 7px -1px rgba(44, 43, 43, 0.527);
+    background-color: rgb(243, 243, 243);
+    padding: 10px;
+    font-size: 22px;
+    margin-left: 8%;
+    margin-top: 10px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td {
+    padding: 15px;
+}
+
+.msg{
+    font-size: 18px;
+    color:darkcyan;
+    font-weight: 600;
+    text-align: right;
+}
+
+.btn1{
+    border: 2px solid mediumaquamarine;
+    background-color: mediumaquamarine;
+    padding: 15px;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    font-family: "Roboto", sans-serif;
+    margin-left: 35%;
+    margin-right: 35%;
+    width: 25%;
+    text-align: center;
+}
+.btn2{
+    border: 2px solid rgb(124, 145, 211);
+    background-color: rgb(124, 145, 211);
+    margin-left: 2%;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 16px;
+    display: inline-block;
+
+}
+.dvblock{
+    margin-top: 30px;
+    text-align: center;
+}
+a{
+    text-decoration: none;
+    color: black;
+}
+.trans{
+    position: fixed;
+    z-index: 9999;
+    padding: 50px 0 50px 0;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, .4);
+    display: none;
+}
+
+.transcontent {
+    width: 25%;
+    border: none;
+    background-color: #fbfdfe;
+    margin: auto;
+    padding: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 1px 1px 14px 3px rgba(0,0,0,0.75);	
+}
+.transDetail{
+    display: inline-block;
+    
+}
+.translist{
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.listitem{
+    margin-left: 10px;
+    margin-right: 10px;
+    border-bottom: solid 1px gray;
+    padding: 10px 0px;
+    
+}
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 30px;
+    font-weight: 700
+}
+
+.close:focus,
+.close:hover {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer
+}

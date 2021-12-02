@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Liquidity</title>
+        <script src="assets/js/jquery-3.4.1.min.js"></script>
+        <link rel="stylesheet" href="assets/css/liquidity.css">
+        
+       <script>
+        $(document).ready(function ()  
+        {
+        $(".close").on("click", function () 
+            {                  
+                $("#trans").css("display", "none")
+            });
+        $(".history").on("click", function () 
+            {                  
+                $("#trans").css("display", "block")
+            });
+        });
+    </script>
+    </head>
+
+    <body>
+        
+        <div class="block">
+            
+           <div class="top">Your Liquidity
+            <div style="display: inline-block; margin-left:20%;" class="history" id="history">
+                <img src="image/history.png" width="20px" height="20px">
+            </div>
+            
+            <div class="btn2"><a href="addLiquidity.html">Add Liquidity</a></div>
+            </div>
+            <div class="bottom">
+                <div class="dvblock">
+                    <p>No Liquidity</p><br/>
+                    <p>Don't see a pool you joined?</p>
+                    <div class="btn1" click=><a href="addPool.html">Import Pool</a></div>
+                </div>
+
+                <!-- List-->
+                    <div class="list">
+                        <div class="list-content">
+                            <table>
+                                <tr>
+                                  <td>-</td>
+                                  <td style="text-align: right;">Token1</td>
+                                </tr>
+                                <tr >
+                                  <td>-</td>
+                                  <td style="text-align: right;">Token2</td>
+                                </tr>
+                            </table>
+                            <div class="msg">Receive WBNB</div>
+                        </div>
+
+                        <div class="list-content">
+                            <table>
+                                <tr>
+                                  <td>-</td>
+                                  <td style="text-align: right;">Token1</td>
+                                </tr>
+                                <tr >
+                                  <td>-</td>
+                                  <td style="text-align: right;">Token2</td>
+                                </tr>
+                            </table>
+                            <div class="msg">Receive WBNB</div>
+                        </div>
+                    </div>
+               
+
+            </div>
+        </div>
+
+        <div class='trans' id='trans'>
+            <div class='transcontent'>
+                <span class="close" id='close'>&times;</span>
+                <div>
+                    <h3>Recent Transaction</h3>
+                    <p style="text-align: center;">No Recent Transaction</p>
+                    <div class="translist">
+                        <div class="listitem">
+                            <div class="transDetail">
+                                <div style="float: left;margin-left:30px;">Test</div>
+                                <div style="float: right; margin-left:220px;">123</div>
+                            </div>
+                        </div>
+                        <div class="listitem">
+                            <div class="transDetail">
+                                <div style="float: left;margin-left:30px;">Test</div>
+                                <div style="float: right; margin-left:220px;">123</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
