@@ -1,0 +1,90 @@
+//SPDX-License-Identifier:MIT
+pragma solidity ^0.8.0;
+
+contract xyk{
+
+    // x * y = k
+    // k is never changes
+
+    // let supposed ETH = $100, DAI = $1
+    // If we want to supply $1000, then we have to supply 10ETH and 1000DAI
+    // So, x = ETH, y = DAI
+    // x * y = k
+    // 10 * 1000 = 10000
+    
+    // The price of ETH = y/x = 1000/10 = 100
+    // The price of DAI = x/y = 10/1000 = 0.01
+
+    // Example ONE
+    // Buy 1 ETH (Give ETH, take DAI)
+    // (10 - 1) * (1000 + x) = 10000
+    // 9 * 1000 + x = 10000
+    // 1000 + x = 10000/9
+    // 1000 + x = 1111.11
+    // x = 1111.11 - 1000
+    // x = 111.11 <--- not price ya, it is just the increased number of DAI
+    // 9 * 1000 + 111.11
+    // 9 * 1111.11 = 10000
+
+    // Example TWO
+    // Swap 1 ETH to get DAI
+    // (9 + 1) * (1111 - x) = 10000
+    // 10 * (1111 - x) = 10000
+    // 1111 - x = 10000/10
+    // 1111 - x = 1000
+    // x = 111 <--- not price ya, it is just the decreased number of DAI
+    // 10 * 1111-111
+    // 10 * 1000 = 10000
+
+    // refer to https://www.youtube.com/watch?v=Ui1TBPdnEJU&t=888s
+
+    uint public x;
+    uint public y;
+    uint private k; // k = constant
+
+    uint public userAccountTokenX;
+    uint public userAccountTokenY;
+
+    constructor(){
+        x = 1200; //simulate 1200 DAI
+        y = 400; //simulate 400 ETH
+        k = x * y; // simulate k = 10000
+        userAccountTokenX = 100; //simulate user account token X
+        userAccountTokenY = 10; //simulate user account token Y
+    }
+
+    function getK() public view returns(uint){
+        return k;
+    }
+
+    //simulate Example ONE (Deduct ETH)
+    function swap(uint tokenX) public{
+        x -= tokenX;
+        y += ((k/x) - y);
+    }
+
+    //simulate Example TWO (Add ETH)
+    function add(uint tokenX) public{
+        x += tokenX;
+        y -= (y - (k/x));
+    }
+
+    //simulate swap X to Y
+    function SWAP_X_to_Y(uint tokenX) public{
+        //Step 1: Deduct user account token X
+        userAccountTokenX -= tokenX - (tokenX * 3 / 100);
+
+        //Step 2: Add tokenX to x (plus 0.3% incentive)
+        x += tokenX + (tokenX * 3 / 100);
+
+        //Step 3: Calculate different between y - (k/x)
+        uint difference = y - (k/x);
+
+        //Step 4: Add into user account token y
+        userAccountTokenY += difference;
+
+        //Step 5: Deduct from y
+        y -= difference;
+    }
+
+}
