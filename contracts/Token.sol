@@ -36,7 +36,8 @@ interface ERC20Interface {
     function transfer(address to, uint tokens) external returns (bool success);
     function approve(address spender, uint tokens) external returns (bool success);
     function transferFrom(address from, address to, uint tokens) external returns (bool success);
- 
+    function burn(address account, uint amount) external returns(bool success);
+
     event Transfer(address indexed from, address indexed to, uint tokens);
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 }
@@ -101,7 +102,24 @@ contract Token is ERC20Interface, SafeMath {
     function allowance(address tokenOwner, address spender) public view override returns (uint) {
         return allowed[tokenOwner][spender];
     }
- 
+
+    //Reference: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
+    function burn(address account, uint amount)public override isOwner(msg.sender) returns(bool){
+        require(account != address(0), "ERC20: burn from the zero address");
+        
+        uint256 accountBalance = balances[account];
+        require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
+        balances[account] = safeSub(accountBalance, amount);
+        _totalSupply = safeSub(_totalSupply,amount);
+
+        emit Transfer(account, address(0), amount);
+        return true;
+    }
+    
+    modifier isOwner(address account){
+        require(deployer == account);
+        _;
+    }
     // function approveAndCall(address spender, uint tokens, bytes memory data) public virtual returns (bool) {
     //     allowed[msg.sender][spender] = tokens;
     //     emit Approval(msg.sender, spender, tokens);
