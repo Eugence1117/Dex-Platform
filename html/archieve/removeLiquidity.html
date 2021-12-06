@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="../assets/js/jquery-3.4.1.min.js"></script>
+        <link rel="stylesheet" href="../assets/css/removeLiquidity.css">
+
+        <script type="text/javascript">
+            function rangeSlide(value) {
+                document.getElementById('rangeValue').innerHTML = value;
+            }
+        </script>
+    </head>
+
+    <body>
+        <div class="block">
+            <div class="head">
+                <div style="display: inline-block;top:10px;">
+                    <a href="liquidity.html"><img src="../assets/images/arrow-left-solid.png" width="24px" height="24px"></a>&nbsp;&nbsp;
+                </div>
+                <div style="display: inline-block;">
+                    <p style="font-size: 20px;">Remove Liquidity</p>
+                </div>
+            </div>
+            <div class="content">
+                <div class="section">
+                    <table>
+                        <tr>
+                            <td>Amount</td>
+                            <td style="float: right;">Detailed</td>
+                        </tr>
+                    </table>
+                    <div class="slider">
+                        <span id="rangeValue">0 </span><span style="display: inline-block;">%</span>
+                        <Input class="range" type="range" name "" value="0" min="0" max="100" onChange="rangeSlide(this.value)" 
+                    onmousemove="rangeSlide(this.value)"></Input>
+                    </div>
+                </div>
+                <div style="margin-left: 50%; margin-top: 10px;margin-bottom: 10px;">
+                    <img src="../assets/images/arrow-down.png" width="24px" height="24px">
+                </div>
+                <div class="section">
+                    <table>
+                        <tr>
+                          <td>-</td>
+                          <td style="text-align: right;">Token1</td>
+                        </tr>
+                        <tr >
+                          <td>-</td>
+                          <td style="text-align: right;">Token2</td>
+                        </tr>
+                    </table>
+                    <div class="msg">Receive WBNB</div>
+                </div>
+                <div class="btmsection">
+                    <table>
+                        <tr>
+                          <td><div>Price : </div></td>
+                          <td style="text-align: right;">
+                            <div >
+                                1BGOV = 0.00026312 BNB 
+                            </div>
+                            <div>
+                                1BNB = 3800.55 BGOV
+                            </div>
+                          </td>
+                        </tr>
+                    </table>
+                </div>
+                <button type="submit" class="btn">Remove</button>
+            </div>
+        </div>
+        
+
+    </body>
+</html>
