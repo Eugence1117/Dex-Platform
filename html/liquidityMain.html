@@ -45,6 +45,12 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn" data-bs-toggle="collapse" href="#listLiquidity" aria-expanded="true" aria-controls="addLiquidity"><h4><i class="fas fa-list"></i> Your Liquidity</h4></a>
+                                        <div class="fa-pull-right d-inline-block">
+                                            <a class="btn a-btn-slide-text btn-outline-light btn-sm btn-block" data-bs-toggle="modal" data-bs-target="#addPoolModal">
+                                                <span class="fas fa-plus-circle" aria-hidden="true"></span>
+                                                <span>Import Pool</span>
+                                            </a>
+                                          </div>
                                     </div>
 
                                     <div id="listLiquidity" class="collapse show" aria-labelledby="listLiquidity">
@@ -96,5 +102,25 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" tabindex="-1" role="dialog" id="addPoolModal">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Import Pool</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">                        
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Import Pool HERE</p>
+                    </div>
+                    <div class="modal-footer">                      
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary">Import</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
         </body>
     </html>
