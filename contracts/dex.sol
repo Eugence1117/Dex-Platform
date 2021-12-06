@@ -170,4 +170,29 @@ contract dex{
         require(sender == owner,"Only owner able to execute this action.");
         _;
     }
+	
+	//qinghao xyk model part
+    function SWAP_X_to_Y(address fromToken, address toToken, uint256 tokenX) public payable{
+        //Step 1: Select pool
+        address poolID = generatePoolId(fromToken, toToken);
+
+        //Step 2: Calculate K (here got no K value, we calculate manually)
+        uint k = liquidityPool[poolID].token1Balance * liquidityPool[poolID].token2Balance;
+
+        //Step 3: SWAP_X_to_Y
+        //Step 3.1: Transfer amount of TokenX (fromToken) from user account to pool
+        require(tokenX <= tokens[fromToken].allowance(msg.sender,address(this)),"Not enough token");
+        tokens[fromToken].transferFrom(msg.sender, address(this), tokenX); //transferfrom
+
+        //Step 3.2: Calculate different between y-(k/x)
+        uint difference = liquidityPool[poolID].token2Balance - (k/liquidityPool[poolID].token1Balance);
+
+        //Step 3.3: Transfer the amount of difference from pool to user account
+        tokens[toToken].transfer(msg.sender, difference); //transfer
+
+	    //Step 3.4: update pool's token value
+        liquidityPool[poolID].token1Balance += tokenX; //plus because we add in the tokenX into Pool
+        liquidityPool[poolID].token2Balance -= difference; //minus because we already take the tokenY
+        
+    }
 }

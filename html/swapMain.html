@@ -11,6 +11,35 @@
     <link
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
       rel="stylesheet">
+	  
+	<style>
+		.custom-token-col, .custom-form{
+			padding: 20px 14px;
+			padding-bottom:0px;
+			background-color:rgba(0, 0, 0, 0.3);
+			margin: 3px auto;
+			border-radius:28px;
+		}
+		
+		.custom-form{
+			padding-top:13px;
+			padding-left:18px;
+			padding-right:18px;
+			padding-bottom:10px;
+			background-color:rgb(7, 54, 66);
+			border-radius:28px;
+			max-width:500px;
+		}
+		
+		.custom-token-select{
+			border-radius:20px;
+		}
+		
+		.custom-token-amount{
+			border-radius:20px;
+		}
+	</style>
+	  
   </head>
 
   <body>
@@ -39,6 +68,73 @@
     <div class="wrapper" style="padding:5em">
       <div class="content-wrapper d-flex align-items-center">
         <div class="container-fluid">
+			<form action="#" class="custom-form">
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<h5>Swap</h5>
+					</div>
+				</div>
+				
+				<div class="row">
+					<!--From Token-->
+					<div class="col-md-12 custom-token-col">
+						<div class="row g-1">
+							<div class="col-md-4">
+								<select class="form-select custom-token-select" aria-label="Default select example">
+								  <option selected>Token</option>
+								  <option value="1">ETH</option>
+								  <option value="2">BTC</option>
+								  <option value="3">DAI</option>
+								</select>
+							</div>
+							<div class="col-md-8">
+								<input class="form-control custom-token-amount" type="text" placeholder="Amount" aria-label="default input">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 pt-3 pb-3">
+								Balance: 5.199 ETH (MAX)
+							</div>
+						</div>
+					</div>
+					
+					<!--To Token-->
+					<div class="col-md-12 custom-token-col">
+						<div class="row g-1">
+							<div class="col-md-4">
+								<select class="form-select custom-token-select" aria-label="Default select">
+								  <option selected>Token</option>
+								  <option value="1">ETH</option>
+								  <option value="2">BTC</option>
+								  <option value="3">DAI</option>
+								</select>
+							</div>
+							<div class="col-md-8">
+								<input class="form-control custom-token-amount" type="text" placeholder="Amount" aria-label="default input">
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 pt-3 pb-3">
+								Balance: 32.07 DAI
+							</div>
+						</div>
+					</div>
+					
+					<!--Exchange Rate-->
+					<div class="col-md-12">
+						<div class="row">
+							<div class="col-md-12 text-end p-2">
+								1 DAI = 0.003325 ETH
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="d-grid gap-2">
+					<button type="submit" class="btn btn-primary btn-lg p-3" style="border-radius:20px;">Swap</button>
+				</div>
+			</form>
+		
         </div>
       </div>
     </div>
