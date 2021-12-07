@@ -20,8 +20,6 @@ contract dex{
     constructor(){                                                                          
         owner = msg.sender;
     }
-    
-    event PoolDetails(Pool);
 
     function checkBalances(address token, uint amount)public view returns(bool){
         return ERC20Interface(token).balanceOf(msg.sender) >= amount;
@@ -246,13 +244,5 @@ contract dex{
         uint token2Received = convertLPTokenToToken(amount,poolToken.totalSupply(),liquidityPool[pool].token2Balance);        
               
         return (token1Received,token2Received,liquidityPool[pool].token1,liquidityPool[pool].token2);
-    }
-
-    function getPoolDetails(address pool)public returns(bool){
-        if(isPoolExist(pool)){            
-            emit PoolDetails(liquidityPool[pool]);
-            return true;
-        }
-        return false;
     }
 }

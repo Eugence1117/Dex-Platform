@@ -61,7 +61,6 @@ contract Token is ERC20Interface, SafeMath {
     uint public _totalSupply;
  
     address deployer;
-    bool private isExist = false;
 
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
@@ -73,7 +72,6 @@ contract Token is ERC20Interface, SafeMath {
         _totalSupply = _total;
         deployer = msg.sender;        
         balances[deployer] = _totalSupply;
-        isExist = true;
         emit Transfer(address(0), deployer, _totalSupply);
     }
  
