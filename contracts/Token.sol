@@ -30,13 +30,14 @@ contract SafeMath {
 //ERC Token Standard #20 Interface
  
 interface ERC20Interface {
-    function totalSupply() external view returns (uint);
+    function totalSupply() external view returns (uint);    
     function balanceOf(address tokenOwner) external view returns (uint balance);
     function allowance(address tokenOwner, address spender) external view returns (uint remaining);
     function transfer(address to, uint tokens) external returns (bool success);
     function approve(address spender, uint tokens) external returns (bool success);
     function transferFrom(address from, address to, uint tokens) external returns (bool success);
     function burn(address account, uint amount) external returns(bool success);
+    function mint(address to, uint amount) external returns(bool success);
 
     event Transfer(address indexed from, address indexed to, uint tokens);
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
@@ -115,6 +116,11 @@ contract Token is ERC20Interface, SafeMath {
         emit Transfer(account, address(0), amount);
         return true;
     }
+
+    function mint(address, uint)public override virtual isOwner(msg.sender) returns(bool){
+        require(false,"This token is not mintable.");
+        return false;
+    }
     
     modifier isOwner(address account){
         require(deployer == account);
@@ -126,5 +132,16 @@ contract Token is ERC20Interface, SafeMath {
     //     ApproveAndCallFallBack(spender).receiveApproval(msg.sender, tokens, this, data);
     //     return true;
     // }
+}
 
+contract MintableToken is Token{
+    constructor(string memory _symbol, string memory _name, uint8 _decimal) Token(_symbol,_name,_decimal,0){        
+    }   
+
+    function mint(address to, uint amount)public override isOwner(msg.sender) returns(bool){
+        _totalSupply += amount;        
+        balances[to] = safeAdd(balances[to], amount);
+        emit Transfer(msg.sender, to, amount);
+        return true;
+    }
 }
