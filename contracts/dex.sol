@@ -190,7 +190,7 @@ contract dex{
         _;
     }
 
-     function SWAP_X_to_Y(address fromToken, address toToken, uint256 tokenX) public payable{
+    function swap(address fromToken, address toToken, uint256 tokenX) public payable{
         //Step 1: Select pool
         address poolID = generatePoolId(fromToken, toToken);
         require(liquidityPool[poolID].isAdded,"Liquidity Pool not found.");
@@ -198,22 +198,33 @@ contract dex{
         //Step 2: Calculate K (here got no K value, we calculate manually)
         uint k = liquidityPool[poolID].token1Balance * liquidityPool[poolID].token2Balance;
 
-        //Step 3: SWAP_X_to_Y
-        //Step 3.1: Transfer amount of TokenX (fromToken) from user account to pool
+        //Step 3: SWAP_X_to_Y        
         ERC20Interface tokenFrom = ERC20Interface(fromToken);
-        require(tokenX <= tokenFrom.allowance(msg.sender,address(this)),"Not enough token");
-        tokenFrom.transferFrom(msg.sender, address(this), tokenX); //transferfrom
-
-        //Step 3.2: Calculate different between y-(k/x)
-        uint difference = liquidityPool[poolID].token2Balance - (k/(liquidityPool[poolID].token1Balance+tokenX));
-
         ERC20Interface tokenTo = ERC20Interface(toToken);
-        //Step 3.3: Transfer the amount of difference from pool to user account
-        tokenTo.transfer(msg.sender, difference); //transfer
 
+        require(tokenX <= tokenFrom.allowance(msg.sender,address(this)),"Not enough token");
+
+        //Step 3.1: Calculate different between y-(k/x)
+        uint difference = liquidityPool[poolID].token2Balance - (k/(liquidityPool[poolID].token1Balance+tokenX));
+                
+        //Step 3.2: Transfer the amount of difference from pool to user account
+        require(tokenTo.transfer(msg.sender, difference),"Transaction failed."); //transfer
+
+        //Step 3.3: Transfer amount of TokenX (fromToken) from user account to pool
+        require(tokenFrom.transferFrom(msg.sender, address(this), tokenX),"Transaction failed"); //transferfrom
+            
 	    //Step 3.4: update pool's token value
         liquidityPool[poolID].token1Balance += tokenX; //plus because we add in the tokenX into Pool
-        liquidityPool[poolID].token2Balance -= difference; //minus because we already take the tokenY
+        liquidityPool[poolID].token2Balance -= difference; //minus because we already take the tokenY        
+    }
+
+    function estSwap(address fromToken,address toToken, uint256 tokenX)public view returns(uint){
+        address poolID = generatePoolId(fromToken, toToken);
+        require(liquidityPool[poolID].isAdded,"Liquidity Pool not found.");
         
+        uint k = liquidityPool[poolID].token1Balance * liquidityPool[poolID].token2Balance;
+                
+        uint difference = liquidityPool[poolID].token2Balance - (k/(liquidityPool[poolID].token1Balance+tokenX));
+        return difference;
     }
 }
