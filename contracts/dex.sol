@@ -15,49 +15,33 @@ contract dex{
     }
 
     mapping(address => Pool) public liquidityPool;
-    address private owner;
-    
-    event Response(address sender, string message, address contractAddress);
+    address private owner;        
 
     constructor(){                                                                          
         owner = msg.sender;
     }
     
-    // /*FUNCTION TO BE REMOVED*/
-    // function createToken()public payable returns(address){
-    //     Token token = new Token("BTC","BitCoin",4,10000000);
-    //     return address(token);
-    // }
-        
-    // function getContractBalance()public view returns(uint){
-    //     return address(this).balance;
-    // }
+    event PoolDetails(Pool);
 
-    // function mintToken(address to, address token, uint amount)public payable{
-    //     require(amount <= tokens[token].totalSupply(),"Not enough supply.");
-    //     tokens[token].transfer(to,amount);
-    // }
-
-    // function transferTest(uint amount, address token)public payable{
-    //     require(tokens[token].transferFrom(msg.sender,address(this),amount));
-    // }
-
-    // function getAllToken() public view{
-    //     //PENDING return in JSON FORM 
-    // }
-
-    // /*END FUNCTION TO BE REMOVED*/
-
-
-    // function importToken(address tokenAddress)public {
-    //     tokens[tokenAddress] = ERC20Interface(tokenAddress);
-    // }
-
-    function getBalances(address token)public view returns(uint){
-        return ERC20Interface(token).balanceOf(msg.sender);
+    function checkBalances(address token, uint amount)public view returns(bool){
+        return ERC20Interface(token).balanceOf(msg.sender) >= amount;
     }
 
-    function fundLiquidityPool(address payable token1, address payable token2, uint token1Amount) public payable returns(address){//isValidToken(token1) isValidToken(token2)
+    function isPoolExist(address tokenA, address tokenB)public view returns(bool){
+        require(tokenA != tokenB,"Invalid Token Pair");
+        return isPoolExist(generatePoolId(tokenA,tokenB));
+    }
+
+    //END
+
+    //Or Connect To Token Contract Via FrontEnd
+    function getLPTokenAddress(address pool)public view returns(address) {
+        require(isPoolExist(pool),"Invalid Pool");
+        Pool memory poolSelected = liquidityPool[pool];
+        return poolSelected.poolToken;        
+    }
+    
+    function fundLiquidityPool(address payable token1, address payable token2, uint token1Amount) public payable returns(address){
         require(token1 != token2,"Invalid pool");    
         address poolAddress = generatePoolId(token1,token2);
         require(isPoolExist(poolAddress),"Pool is not exist, please create a new pool.");        
@@ -137,7 +121,7 @@ contract dex{
 
     function isPoolExist(address _address) private view returns(bool){
         Pool memory pool = liquidityPool[_address];
-        return pool.isAdded || (pool.token1Balance == 0 && pool.token2Balance == 0);        
+        return pool.isAdded;        
     }
 
     //PURE FUNCTION
@@ -226,5 +210,49 @@ contract dex{
                 
         uint difference = liquidityPool[poolID].token2Balance - (k/(liquidityPool[poolID].token1Balance+tokenX));
         return difference;
+    }
+
+    function estFundPool(address tokenA, address tokenB, uint amount)public view returns(uint amount2,address token2, uint share){
+        require(tokenA != tokenB,"Invalid Pool");
+        address poolAddress = generatePoolId(tokenA,tokenB);
+        require(isPoolExist(poolAddress),"Pool is not exist.");        
+        
+        uint token2Amount = computePrice(liquidityPool[poolAddress].token1Balance,liquidityPool[poolAddress].token2Balance,amount);  
+
+        ERC20Interface poolToken = ERC20Interface(liquidityPool[poolAddress].poolToken);
+        uint tokenReceived = calculateLPToken(false,amount,token2Amount,liquidityPool[poolAddress].token1Balance,liquidityPool[poolAddress].token2Balance,poolToken.totalSupply());
+
+        return (token2Amount,tokenB,tokenReceived * 1000 / poolToken.totalSupply());
+        //Return Amount Need To import for B, Address of B, And share in percentage (0 stands for < 0.01%)
+    }
+
+    function estAddNewPool(address tokenA, address tokenB, uint amountA,uint amountB)public view returns(uint amountReceived,uint decimal){
+        require(tokenA != tokenB,"Invalid liquidity pool.");
+        address poolAddress = generatePoolId(tokenA,tokenB);
+
+        require(!liquidityPool[poolAddress].isAdded,"Pool already exist");
+
+        uint tokenReceived = calculateLPToken(true,amountA,amountB,0,0,0); //By Default Pool is empty
+
+        return (tokenReceived,8);
+    }
+
+    function estWithdrawFund(address pool, uint amount)public view returns(uint amount1,uint amount2,address token1,address token2){
+        require(isPoolExist(pool),"Invalid Pool.");
+        
+        ERC20Interface poolToken = ERC20Interface(liquidityPool[pool].poolToken);
+    
+        uint token1Received = convertLPTokenToToken(amount,poolToken.totalSupply(),liquidityPool[pool].token1Balance);
+        uint token2Received = convertLPTokenToToken(amount,poolToken.totalSupply(),liquidityPool[pool].token2Balance);        
+              
+        return (token1Received,token2Received,liquidityPool[pool].token1,liquidityPool[pool].token2);
+    }
+
+    function getPoolDetails(address pool)public returns(bool){
+        if(isPoolExist(pool)){            
+            emit PoolDetails(liquidityPool[pool]);
+            return true;
+        }
+        return false;
     }
 }

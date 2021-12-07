@@ -1,0 +1,25 @@
+{
+  "name": "dex",
+  "version": "1.0.0",
+  "description": "Decentralized Exchange Platform",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "lite-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eugence1117/Dex-Platform.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Eugence1117/Dex-Platform/issues"
+  },
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  }
+}
