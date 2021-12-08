@@ -25,9 +25,10 @@ contract dex{
         return ERC20Interface(token).balanceOf(msg.sender) >= amount;
     }
 
-    function isPoolExist(address tokenA, address tokenB)public view returns(bool){
+    function isPoolExist(address tokenA, address tokenB)public view returns(bool,address){
         require(tokenA != tokenB,"Invalid Token Pair");
-        return isPoolExist(generatePoolId(tokenA,tokenB));
+        address poolId = generatePoolId(tokenA,tokenB);
+        return (isPoolExist(poolId),poolId);
     }
 
     //END
@@ -83,7 +84,7 @@ contract dex{
         require(tokenB.transferFrom(msg.sender,address(this),token2Amount),"Transaction failed.");
         //console.log("Progress", "Token Transfer completed");
 
-        MintableToken poolToken = new MintableToken("LPT","POOL",8);        
+        MintableToken poolToken = new MintableToken("LPT",concat(tokenA.symbol(),"-",tokenB.symbol()),8);        
         
         uint tokenReceived = calculateLPToken(true,token1Amount,token2Amount,0,0,poolToken.totalSupply()); //By Default Pool is empty
         liquidityPool[poolAddress] = Pool(address(poolToken),token1,token2,token1Amount,token2Amount,true);        
@@ -224,17 +225,6 @@ contract dex{
         //Return Amount Need To import for B, Address of B, And share in percentage (0 stands for < 0.01%)
     }
 
-    function estAddNewPool(address tokenA, address tokenB, uint amountA,uint amountB)public view returns(uint amountReceived,uint decimal){
-        require(tokenA != tokenB,"Invalid liquidity pool.");
-        address poolAddress = generatePoolId(tokenA,tokenB);
-
-        require(!liquidityPool[poolAddress].isAdded,"Pool already exist");
-
-        uint tokenReceived = calculateLPToken(true,amountA,amountB,0,0,0); //By Default Pool is empty
-
-        return (tokenReceived,8);
-    }
-
     function estWithdrawFund(address pool, uint amount)public view returns(uint amount1,uint amount2,address token1,address token2){
         require(isPoolExist(pool),"Invalid Pool.");
         
@@ -245,4 +235,8 @@ contract dex{
               
         return (token1Received,token2Received,liquidityPool[pool].token1,liquidityPool[pool].token2);
     }
+
+    function concat(string memory a, string memory b, string memory c)private pure returns(string memory){
+        return string(abi.encodePacked(a, b,c));
+    }    
 }
