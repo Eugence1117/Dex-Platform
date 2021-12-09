@@ -20,6 +20,11 @@
             .token{
                 max-width:15%;
             }
+
+            .spin{
+                -webkit-animation: .75s linear infinite spinner-border;
+                animation: .75s linear infinite spinner-border;
+            }
             @media (max-width: 768px) {
                 .row{
                     display:block;
@@ -159,7 +164,7 @@
                                                                         <div class="col mb-4">
                                                                             <div class="card">
                                                                                 <div class="card-body">
-                                                                                    <p class="ratioAB">0</p>
+                                                                                    <p class="ratioBA">0</p>
                                                                                     <span class="tokenB"> </span> per <span class="tokenA"></span>
                                                                                 </div>
                                                                             </div>
@@ -167,7 +172,7 @@
                                                                         <div class="col mb-4">
                                                                             <div class="card">
                                                                                 <div class="card-body">
-                                                                                    <p>00.00%</p>
+                                                                                    <p class="percentage">00.00%</p>
                                                                                     <span>Share of Pool</span>
                                                                                 </div>
                                                                             </div>
@@ -176,7 +181,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="footer text-center">
-                                                                <button class="btn btn-primary text-uppercase" id="fundBtn"><i class="fas fa-donate"></i> Fund This Pool</button>
+                                                                <button class="btn btn-primary text-uppercase" id="fundBtn" disabled><i class="fas fa-donate"></i> Fund This Pool</button>
                                                             </div>
                                                         </div>
                                                     </form>                                                    
@@ -503,5 +508,9 @@
                 $("#newForm .tokenA").text(App.tokens.get(tokenA).symbol);
                 $("#newForm .tokenB").text(App.tokens.get(tokenB).symbol);
             }
+
+            Notiflix.Loading.init({
+                svgColor: 'rgb(181, 137, 0)',
+                });
         </script>
     </html>
