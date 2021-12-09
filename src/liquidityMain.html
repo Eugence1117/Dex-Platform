@@ -25,10 +25,8 @@
                 -webkit-animation: .75s linear infinite spinner-border;
                 animation: .75s linear infinite spinner-border;
             }
+
             @media (max-width: 768px) {
-                .row{
-                    display:block;
-                }
                 .col,div[class*="col-"],.btn{
                     width: 100%;
                 }
@@ -37,7 +35,11 @@
                 }
                 .footer{
                     margin:16px 0px 16px 0px;
-                }           
+                }      
+                #btnList{
+                    display: block;
+                    width: 100%;
+                }                
             }
         </style>
     </head>
@@ -67,6 +69,9 @@
                                 <a class="nav-link" href="swap.html">Swap</a>
                             </li>
                         </ul>
+                        <button class="btn btn-secondary fa-pull-right" id="connectWallet">
+                            Connect To Wallet   
+                        </button>
                     </div>
                 </div>
             </div>
@@ -94,13 +99,13 @@
                                         <div class="card">
                                             <div class="card-header">
                                                 <a class="btn" data-bs-toggle="collapse" href="#listLiquidity" data-bs-target="#listLiquidity" aria-expanded="true" aria-controls="listLiquidity"><h4><i class="fas fa-list"></i> Your Liquidity</h4></a>
-                                                <div class="fa-pull-right d-inline-block">
-                                                    <a class="btn a-btn-slide-text btn-outline-light btn-sm btn-block" data-bs-toggle="modal" data-bs-target="#addPoolModal">
+                                                <div class="fa-pull-right d-inline-block" id="btnList">
+                                                    <a class="btn a-btn-slide-text btn-outline-light btn-sm btn-block mb-3" data-bs-toggle="modal" data-bs-target="#addPoolModal">
                                                         <span class="fas fa-plus-circle" aria-hidden="true"></span>
                                                         <span>Import Pool</span>
                                                     </a>
 
-                                                    <a class="btn a-btn-slide-text btn-outline-light btn-sm btn-block" id="refreshPoolBtn">
+                                                    <a class="btn a-btn-slide-text btn-outline-light btn-sm btn-block mb-3" id="refreshPoolBtn">
                                                         <span class="fas fa-sync" aria-hidden="true"></span>
                                                         <span>Refresh Pool</span>
                                                     </a>
@@ -491,7 +496,40 @@
 
             $(document).ready(function(){
                 App.init();
-                initUI();
+                initUI();                
+                if(ethereum.isConnected()){                    
+                    $("#connectWallet").text("Wallet Connected");
+                    $("#connectWallet").attr("disabled",true)
+                }                                
+            })
+
+            ethereum.on('accountsChanged', (accounts) => {
+                console.log(accounts);
+                if(accounts.length > 0){
+                    $("#connectWallet").attr("disabled",true);
+                    $("#connectWallet").text("Wallet Connected");
+                }
+                else{
+                    $("#connectWallet").text("Connect To Wallet");
+                    $("#connectWallet").attr("disabled",false);
+                }
+            });
+
+            $("#connectWallet").on('click',async function(){
+                try {                    
+                    $(this).attr("disabled",true)
+                    await ethereum.request({ method: 'eth_requestAccounts' }).then(result => {
+                        if(result.length > 0){
+                            $(this).text("Wallet Connected");
+                        }
+                        else{
+                            $(this).attr("disabled",false);
+                        }
+                    })                    ;
+                } catch (error) {
+                    console.error(error);
+                    $(this).attr("disabled",false);
+                }
             })
 
             function initUI(){
