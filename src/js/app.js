@@ -128,6 +128,21 @@ App = {
             App.importPool($("#poolAddress").val(),true);
         })
 
+        $("#addTokenBtn").on("click",function(){
+            var validator = $( "#addTokenForm" ).validate();
+			if(!validator.form()){
+				return false;
+			}    
+            
+            var token = App.importToken($("#tokenAddress").val(),true);
+            if(token != null){
+                Notiflix.Notify.info("Token Added");
+            }
+            else{
+                Notiflix.Notify.failure("Unable to add token");
+            }
+        })
+
         $("#fundBtn").on("click",function(e){
             e.preventDefault();
 
@@ -272,12 +287,12 @@ App = {
                     Notiflix.Notify.failure("Pool already exist.");
                     return null;
                 }                
-            }).then(function(poolAddress){
+            }).then(async function(poolAddress){
                 console.log(poolAddress);
                 if(poolAddress != null){
 
-                    console.log(poolAddress);
-                    App.importPool(poolAddress,false);                    
+                    console.log("Pool Address: " + poolAddress);
+                    await App.importPool(poolAddress,false);                    
                 }
             }).catch(function (e) {
                 console.log(e);
@@ -433,15 +448,18 @@ App = {
                 return instance.liquidityPool(poolAddress);
             }).then(function (result) {
                 if(!result[5]){
+                    console.log("Pool Not Found");
                     Notiflix.Notify.info("Pool Not Found.");
                 }
                 else{
                     var pool = {};
                     var poolToken = result[0];                                        
                     var tokenA = result[1];
-                    var tokenB = result[2];                    
+                    var tokenB = result[2];               
+
                     console.log("Pool Token" + poolToken);
-                    App.addToken(poolToken);
+
+                    App.addNewToken(poolToken);
 
                     pool["balanceA"] = result[3];
                     pool["balanceB"] = result[4];
@@ -525,54 +543,66 @@ App = {
             });                          
         }
     },
-    importToken:function(token){
+    importToken:function(token,addToList){
         if(token == ""){
             Notiflix.Notify.warning("Invalid Request");
-            return false;
+            return null;
         }
         else{
-            return App.contracts.token.at(token).then(async function (ins) {
-                instance = ins;           
-
-                try{
-                    var symbol = await instance.symbol.call();    
-                    var decimal = await instance.decimals.call();
-                    var name = await instance.name.call();
-                    
-                    var objToken = {};
-                    objToken.symbol = symbol;
-                    objToken.decimal = decimal;
-                    objToken.name = name;
-                    objToken.address = token;
-
-                    var cookie = getCookie("tokens");
-                    var tokens = [];
-                    if(cookie != ""){
-                        tokens = JSON.parse(cookie);
-
-                        var isFound = false;
-                        for(var i = 0 ; i < tokens.length; i++){
-                            if(tokens[i].address == token){
-                                isFound = true;
+            try{
+                return App.contracts.token.at(token).then(async function (ins) {
+                    instance = ins;           
+    
+                    try{
+                        var symbol = await instance.symbol.call();    
+                        var decimal = (await instance.decimals.call()).toNumber();
+                        var name = await instance.name.call();
+                        
+                        var objToken = {};
+                        objToken.symbol = symbol;
+                        objToken.decimal = decimal;
+                        objToken.name = name;
+                        objToken.address = token;
+    
+                        var cookie = getCookie("tokens");
+                        var tokens = [];
+                        if(cookie != ""){
+                            tokens = JSON.parse(cookie);
+    
+                            var isFound = false;
+                            for(var i = 0 ; i < tokens.length; i++){
+                                if(tokens[i].address == token){
+                                    isFound = true;
+                                }
                             }
                         }
+                        if(!isFound){
+                            tokens.push(objToken);
+                        }         
+                        App.tokens.set(token,objToken);
+                        if(addToList){
+                            setCookie(tokens,"tokens")                        
+                            refreshTokenList();
+                        }                    
+    
+                        return objToken;
                     }
-                    if(!isFound){
-                        tokens.push(objToken);
-                    }                    
-                    setCookie(tokens,"tokens")
-                    App.tokens.set(token,objToken);
-
-                    return objToken;
-                }
-                catch(e){
+                    catch(e){
+                        console.error(e);
+                        return null;
+                    }
+                }).catch(function(e){
                     console.error(e);
                     return null;
-                }
-            });
+                });
+            }
+            catch(e){
+                console.error(e);
+                return null;
+            }            
         }
     },
-    addToken:async function(token){
+    addNewToken:async function(token){
         if(token == ""){
             Notiflix.Notify.warning("Invalid Request");
             return false;
@@ -593,9 +623,9 @@ App = {
                     var t = App.tokens.get(token);   
                     console.log("Before"+t);
                     if(typeof t == "undefined"){
-                        t = await importToken(token);
+                        t = await App.importToken(token,false); //Avoid Adding to List
                     }
-                    console.log("After"+t);
+                    console.log(t);
                     if(t != null){
                         var isSuccess = await App.web3Provider.request({
                             method: 'wallet_watchAsset',
@@ -622,6 +652,35 @@ App = {
             }
             else{
                 var tokens = []
+
+                var t = App.tokens.get(token);
+                console.log("Before" + t);
+                if (typeof t == "undefined") {
+                    t = await App.importToken(token,false);//Avoid Adding to List
+                }
+                console.log(t);
+                if (t != null) {
+                    var isSuccess = await App.web3Provider.request({
+                        method: 'wallet_watchAsset',
+                        params: {
+                            type: 'ERC20',
+                            options: {
+                                address: token,
+                                symbol: t.symbol,
+                                decimals: t.decimal,
+                                image: '',
+                            },
+                        }
+                    })
+
+                    if (isSuccess) {
+                        tokens.push(token);
+                    }
+                    return isSuccess;
+                }
+                else {
+                    return false;
+                }
             }
         }
     },
@@ -793,7 +852,7 @@ App = {
             try{
                 console.log(amountA);
                 const isAapprove = await App.contracts.token.at(tokenA).then(async function (ins) {                      
-                    if((await ins.allowance.call(ethereum.selectedAddress,contractAddress)).toNumber() <= amountA){
+                    if((await ins.allowance.call(ethereum.selectedAddress,contractAddress)).toNumber() < amountA){
                         return ins.approve(contractAddress,amountA,{'from': ethereum.selectedAddress});            
                     }           
                     else{
@@ -802,7 +861,7 @@ App = {
                 })         
                 console.log(amountB);
                 const isBapprove = await App.contracts.token.at(tokenB).then(async function (ins) { 
-                    if((await ins.allowance.call(ethereum.selectedAddress,contractAddress)).toNumber() <= amountB){
+                    if((await ins.allowance.call(ethereum.selectedAddress,contractAddress)).toNumber() < amountB){
                         return ins.approve(contractAddress,amountB,{'from': ethereum.selectedAddress}); 
                     }           
                     else{
@@ -883,6 +942,22 @@ function setCookie(data,name){
   document.cookie = name+ "=" + JSON.stringify(data) + "; " + expires + "; " + path;
 }
 
+function refreshTokenList(){
+    var cookie = getCookie("tokens");
+    if(cookie != ""){
+        var tokensBuffer = JSON.parse(cookie);
+        var html = "";
+        for(var i = 0 ; i < tokensBuffer.length; i++){            
+            html += "<option value='" + tokensBuffer[i].address + "'>"+tokensBuffer[i].symbol+"</option>";
+            App.tokens.set(tokensBuffer[i].address,tokensBuffer[i]);
+        }
+        $(".token").html(html);        
+        $(".token").each(function(){
+            $(this).val(tokensBuffer[$(this).data("index")].address);
+            $(this).data("prev",$(this).val());
+        })
+    }        
+}
 function createPoolRecord(data){
     var html = "";
 

@@ -70,15 +70,16 @@
                 <div class="content-wrapper d-flex align-items-center">
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-md">
-                                <button class="btn btn-info" id="checkPool">Check Pool Availability</button>
-                            </div>                            
-                            <div class="col-md">
-                                <button class="btn btn-info" id="checkToken">check Token</button>
+                            <div class="col"></div>
+                            <div class="col-8">
+                                <div class="fa-pull-right d-inline-block">
+                                    <a class="btn a-btn-slide-text btn-outline-light btn-sm btn-block" data-bs-toggle="modal" data-bs-target="#addTokenModal">
+                                        <span class="fas fa-plus-circle" aria-hidden="true"></span>
+                                        <span>Import Token</span>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="col-md">
-                                <button class="btn btn-info" id="checkBalance">Check Balance</button>
-                            </div>
+                            <div class="col"></div>
                         </div>
                         <div class="row">
                             <div class="col"></div>
@@ -277,6 +278,27 @@
                 </div>
             </div>
 
+            <div class="modal fade" tabindex="-1" role="dialog" id="addTokenModal">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Import Token</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addTokenForm">
+                                <input type="text" class="form-control" placeholder="0x0000" id="tokenAddress" name="tokenAddress" />
+                            </form> 
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary mb-3" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary mb-3" id="addTokenBtn">Import</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
               <div class="modal fade" tabindex="-1" role="dialog" id="withdrawModal">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                   <div class="modal-content">
@@ -369,6 +391,14 @@
             $("#addPoolForm").validate({
                 rules:{
                     poolAddress:{
+                        required:true
+                    }
+                }
+            });
+
+            $("#addTokenForm").validate({
+                rules:{
+                    tokenAddress:{
                         required:true
                     }
                 }
