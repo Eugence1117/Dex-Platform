@@ -21,8 +21,8 @@ contract dex{
         owner = msg.sender;
     }
 
-    function checkBalances(address token, uint amount)public view returns(bool){
-        return ERC20Interface(token).balanceOf(msg.sender) >= amount;
+    function checkBalances(address token)public view returns(uint){
+        return ERC20Interface(token).balanceOf(msg.sender);
     }
 
     function isPoolExist(address tokenA, address tokenB)public view returns(bool,address){
@@ -30,16 +30,8 @@ contract dex{
         address poolId = generatePoolId(tokenA,tokenB);
         return (isPoolExist(poolId),poolId);
     }
-
     //END
 
-    //Or Connect To Token Contract Via FrontEnd
-    function getLPTokenAddress(address pool)public view returns(address) {
-        require(isPoolExist(pool),"Invalid Pool");
-        Pool memory poolSelected = liquidityPool[pool];
-        return poolSelected.poolToken;        
-    }
-    
     function fundLiquidityPool(address payable token1, address payable token2, uint token1Amount) public payable returns(address){
         require(token1 != token2,"Invalid pool");    
         address poolAddress = generatePoolId(token1,token2);

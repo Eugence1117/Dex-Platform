@@ -309,54 +309,45 @@
                     </div>
                     <div class="modal-body">
                         <div class="section">
-                            <table>
-                                <tr>
-                                    <td>Amount</td>
-                                    <td style="float: right;">Detailed</td>
-                                </tr>
-                            </table>
-                            <div class="slider">
+                            <div class="p-2">
                                 <span id="rangeValue">0 </span><span style="display: inline-block;">%</span>
-                                <Input class="range" type="range" value="0" min="0" max="100" onChange="rangeSlide(this.value)" 
+                                <Input class="range" name="tokenCount" type="range" value="0" min="0" max="100" onChange="rangeSlide(this.value)" 
                             onmousemove="rangeSlide(this.value)"></Input>
+                            </div>
+                            <div class="row p-2">
+                                <div class="col-md">
+                                    <span>Token Spend :</span>
+                                </div>
+                                <div class="col-md text-end">
+                                    <span id="tokenSpend">0 LPT</span>
+                                </div>
                             </div>
                         </div>
                         <div class="my-3 text-center">
-                            <h3><span class="fas fa-angle-double-down"></span></h3>
-                            <!-- <img src="../image/arrow-down-pink.png" width="24px" height="24px"> -->
+                            <h3><span class="fas fa-angle-double-down"></span></h3>                            
                         </div>
                         <div class="section">
-                            <table>
-                                <tr>
-                                  <td>-</td>
-                                  <td style="text-align: right;">Token1</td>
-                                </tr>
-                                <tr >
-                                  <td>-</td>
-                                  <td style="text-align: right;">Token2</td>
-                                </tr>
-                            </table>
-                            <div class="msg">Receive WBNB</div>
-                        </div>
-                        <div class="btmsection">
-                            <table>
-                                <tr>
-                                  <td><div>Price : </div></td>
-                                  <td style="text-align: right;">
-                                    <div >
-                                        1BGOV = 0.00026312 BNB 
-                                    </div>
-                                    <div>
-                                        1BNB = 3800.55 BGOV
-                                    </div>
-                                  </td>
-                                </tr>
-                            </table>
+                            <div class="row p-3">
+                                <div class="col-md tokenA">
+                                    Token A
+                                </div>
+                                <div class="col-md text-end tokenAVal">
+                                    0.000000
+                                </div>
+                            </div>
+                            <div class="row p-3">
+                                <div class="col-md tokenB">
+                                    Token B
+                                </div>
+                                <div class="col-md text-end tokenBVal">
+                                    0.000000
+                                </div>
+                            </div>                            
                         </div>
                     </div>
                     <div class="modal-footer">                      
                       <button type="button" class="btn btn-secondary mb-3" data-bs-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary mb-3">Remove</button>
+                      <button type="button" class="btn btn-primary mb-3" id="withdrawBtn">Withdraw</button>
                     </div>
                   </div>
                 </div>

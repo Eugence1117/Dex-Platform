@@ -3,6 +3,7 @@ App = {
     contracts: {},
     blockchainAddress: "http://localhost:7575",    
     tokens: new Map(),
+    pools:new Map(),
 
     init: async function () {
         var tokensBuffer;
@@ -64,6 +65,7 @@ App = {
                     const pools = JSON.parse(cookie);      
                     $("#poolGroup").html("");
                     for(var i = 0 ; i < pools.length;i++){
+                        App.pools.set(pools[i].poolAddress,pools[i]);
                         $("#poolGroup").append(createPoolRecord(pools[i]))                
                     }
         
@@ -75,6 +77,8 @@ App = {
                     $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
                 }
                 $("#refreshPoolBtn .fas").removeClass("spin");
+
+                $(".withdrawBtn").on('click',withdrawHandler);
             }); 
         });
 
@@ -115,6 +119,8 @@ App = {
                 else{
                     $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
                 }
+                $(".withdrawBtn").off('click');
+                $(".withdrawBtn").on('click',withdrawHandler);
                 $("#refreshPoolBtn .fas").removeClass("spin");
             });            
         })
@@ -125,7 +131,7 @@ App = {
 				return false;
 			}    
             
-            App.importPool($("#poolAddress").val(),true);
+            App.importPool($.trim($("#poolAddress").val()),true);
         })
 
         $("#addTokenBtn").on("click",function(){
@@ -206,6 +212,18 @@ App = {
 
             App.addNewPool(tokenA,tokenB,tokenAVal,tokenBVal);
         });
+        
+        $("#withdrawModal").on('hidden.bs.modal',function(){
+            $("#withdrawBtn").off('click');
+            $("input[name=tokenCount]").off('change');
+            $("#rangeValue").text("0 ");
+            $("input[name=tokenCount]").val(0);
+            $("#tokenSpend").text("0 LPT");
+            $("#withdrawModal .tokenA").text("Token A");
+            $("#withdrawModal .tokenB").text("Token B");
+            $("#withdrawModal .tokenAVal").text("0");
+            $("#withdrawModal .tokenBVal").text("0");
+        })
         //SET all the event listener here
 
         //FOR CREATE POOL AND FUND POOl, calculate when user enter value
@@ -268,8 +286,21 @@ App = {
                 var isExist = result[0];
                 var poolId = result[1];                
                 if(!isExist){     
-                    return App.addToken(tokenA,tokenB).then(result => {
-                        return App.authorizeContract(tokenA,tokenB,amountA,amountB).then(result => {
+                    return App.addToken(tokenA,tokenB).then(result => {                        
+                        var tokens = [];
+
+                        var token = {};
+                        token.address = tokenA;
+                        token.amount = amountA;
+
+                        tokens.push(token);
+
+                        token = {};
+                        token.address = tokenB;
+                        token.amount = amountB;
+                        tokens.push(token);
+
+                        return App.authorizeContract(tokens).then(result => {
                             if(result){
                                 return instance.addLiquidityPool(tokenA,tokenB,amountA,amountB,{from:ethereum.selectedAddress}).then(result =>{
                                     return poolId;
@@ -305,25 +336,106 @@ App = {
             });            
         }
     },
-    withdrawFund: function (pool, amount) {
+    withdrawFund: async function (poolAddress, amount) {
         if (amount <= 0) {
             Notiflix.Notify.warning("Invalid Request. Validation Needed");
             return false;
         }
         else {
-            Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
+            const pool = App.pools.get(poolAddress);
+
+            const poolToken = pool.poolToken;
+
+            var token = {};            
+
+            token.amount = amount;
+            token.address = poolToken;
+            var tokens = [token];            
+
+            try{
+                var isSuccess = await App.authorizeContract(tokens);
+                if(isSuccess){
+                    var dexInstance = await App.contracts.dex.deployed().then(function(ins){
+                        return ins;
+                    });
+
+                    await dexInstance.withdrawFund(poolAddress,amount,{from:ethereum.selectedAddress});
+
+                    Notiflix.Notify.info("Fund withdraw successfully.");
+                    $("#withdrawModal").modal("hide");
+                }
+            }
+            catch(e){
+                console.error("Action cancelled");
+                console.log(e);
+            }
+        
         }
     },
-    estWithdrawFund: function (amount) {
-        if (amount <= 0) {
-            Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
+    estWithdrawFund: async function (poolAddress) {
+        Notiflix.Loading.circle("Fetching Pool Details...");
+        var dexInstance = await App.contracts.dex.deployed().then(function(ins){
+            return ins;
+        });
+
+        const pool = App.pools.get(poolAddress);
+        console.log(pool);
+        var balances = (await dexInstance.checkBalances.call(pool.poolToken,{from:ethereum.selectedAddress})).toNumber();
+        if(typeof App.tokens.get(pool.poolToken) == "undefined"){
+            await App.importToken(pool.poolToken,false);
         }
-        else {
-            Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
+        const token = App.tokens.get(pool.poolToken);
+
+        balances = balances / (10 ** token.decimal);
+        
+        const defaultValue = (0).toFixed(token.decimal);
+
+        $("input[name=tokenCount]").val(0);
+        $("#rangeValue").text("0 ");
+        $("#tokenSpend").text(defaultValue + " " + token.symbol);
+        
+        console.log(pool.addressTokenA)
+        if(typeof App.tokens.get(pool.addressTokenA) == "undefined"){
+            await App.importToken(pool.addressTokenA,false);
         }
+        const tokenA = App.tokens.get(pool.addressTokenA);
+
+        if(typeof App.tokens.get(pool.addressTokenB) == "undefined"){
+            await App.importToken(pool.addressTokenB,false);
+        }
+        const tokenB = App.tokens.get(pool.addressTokenB);
+
+        $("#withdrawModal .tokenA").text(tokenA.symbol);
+        $("#withdrawModal .tokenB").text(tokenB.symbol);
+        $("#withdrawModal .tokenAVal").text((0).toFixed(tokenA.decimal));
+        $("#withdrawModal .tokenBVal").text((0).toFixed(tokenB.decimal)); 
+
+        Notiflix.Loading.remove();
+        $("#withdrawModal").modal("show");
+
+        var tokenSpend = 0;
+        $("input[name=tokenCount]").on('change',async function(){
+            tokenSpend = (balances * $(this).val() / 100).toFixed(token.decimal);
+            $("#tokenSpend").text(tokenSpend + " " + token.symbol);
+
+            
+            var result = await dexInstance.estWithdrawFund.call(poolAddress,tokenSpend * (10 ** token.decimal));
+            var tokenAamount = result[0].toNumber();
+            var tokenBamount = result[1].toNumber();
+
+            $("#withdrawModal .tokenAVal").text((tokenAamount / (10 ** tokenA.decimal)).toFixed(tokenA.decimal));
+            $("#withdrawModal .tokenBVal").text((tokenBamount / (10 ** tokenB.decimal)).toFixed(tokenB.decimal));             
+        });
+
+        $("#withdrawBtn").on('click',function(){    
+            var tokenToUse = tokenSpend * (10 ** token.decimal);            
+            if(tokenToUse == 0){
+                Notiflix.Notify.failure("Please make sure token to withdraw is more than 0.");
+            }
+            else{
+                App.withdrawFund(poolAddress,tokenToUse);
+            }
+        })
     },
     estFundPool: function (tokenA,tokenB,tokenAmount) {
         if (tokenA == tokenB) {
@@ -464,6 +576,9 @@ App = {
                     pool["balanceA"] = result[3];
                     pool["balanceB"] = result[4];
                     pool["poolAddress"] = poolAddress;
+                    pool["poolToken"] = poolToken;
+                    pool["addressTokenA"] = tokenA;
+                    pool["addressTokenB"] = tokenB;
                     
                     App.contracts.token.at(tokenA).then(async function (ins) {
                         instance = ins;                        
@@ -514,13 +629,14 @@ App = {
 
                             if(!isAdded){
                                 pools.push(pool);
+                                App.pools.set(pool.poolAddress,pool);
                             }
                             else{
                                 if(notify){
                                     Notiflix.Notify.info("Pool already added.");
                                 }
                             }
-                                                        
+
                             setCookie(pools,"pools");
 
                             $("#poolGroup").html("");
@@ -531,6 +647,8 @@ App = {
                             if(pools.length == 0){
                                 $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
                             }
+                            $(".withdrawBtn").off('click');
+                            $(".withdrawBtn").on('click',withdrawHandler);
                         });
                     }).catch(function(e){
                         console.error("Invalid Token");
@@ -839,8 +957,8 @@ App = {
             }                        
         }
     },
-    authorizeContract:async function(tokenA,tokenB,amountA,amountB){
-        if(tokenA == "" || amountA <= 0 || tokenB == "" || amountB <= 0){
+    authorizeContract:async function(tokens){
+        if(tokens.length <= 0){
             Notiflix.Notify.warning("Invalid Request");
             return false;
         }
@@ -850,34 +968,25 @@ App = {
             })                      
 
             try{
-                console.log(amountA);
-                const isAapprove = await App.contracts.token.at(tokenA).then(async function (ins) {                      
-                    if((await ins.allowance.call(ethereum.selectedAddress,contractAddress)).toNumber() < amountA){
-                        return ins.approve(contractAddress,amountA,{'from': ethereum.selectedAddress});            
-                    }           
-                    else{
-                        return true;
-                    }                                                               
-                })         
-                console.log(amountB);
-                const isBapprove = await App.contracts.token.at(tokenB).then(async function (ins) { 
-                    if((await ins.allowance.call(ethereum.selectedAddress,contractAddress)).toNumber() < amountB){
-                        return ins.approve(contractAddress,amountB,{'from': ethereum.selectedAddress}); 
-                    }           
-                    else{
-                        return true;
-                    }                                                  
-                })
-
-                return isAapprove && isBapprove;
+                var isApprove = true;
+                for(var i = 0 ; i < tokens.length ; i++){
+                    isApprove = await App.contracts.token.at(tokens[i].address).then(async function (ins) {                      
+                        if((await ins.allowance.call(ethereum.selectedAddress,contractAddress)).toNumber() < tokens[i].amount){
+                            return ins.approve(contractAddress,tokens[i].amount,{'from': ethereum.selectedAddress});            
+                        }           
+                        else{
+                            return true;
+                        }
+                    })                                                         
+                }
+                return isApprove;
             }
             catch(e){
                 console.error(e);
                 return false;
             }            
         }
-    }
-    ,
+    },
     calculateRatio:function(token1, token2){
         if(token1 == token2 || token1 == "" || token2 == ""){
             Notiflix.Notify.warning("Invalid Request");
@@ -913,7 +1022,17 @@ App = {
                 Notiflix.Notify.failure(e);
             }); 
         }
-    }
+    },
+    checkTokenBalance:function(tokenAddress){
+        return App.contracts.dex.deployed().then(function(ins){
+            return ins.checkBalances.call(tokenAddress,{from:ethereum.selectedAddress});
+        }).then(result => {
+            return result.toNumber() > 0;
+        }).catch(error => {
+            console.error(error);
+            return 0;
+        })
+    }    
 }
 
 function getCookie(cname) {
@@ -958,6 +1077,20 @@ function refreshTokenList(){
         })
     }        
 }
+
+async function withdrawHandler(){
+    var poolAddress = $(this).data("pool");
+
+    var pool = App.pools.get(poolAddress);
+    var isProvider = await App.checkTokenBalance(pool.poolToken);
+    if(isProvider){
+        App.estWithdrawFund(poolAddress);
+    }   
+    else{
+        Notiflix.Notify.failure("You are not entitled to withdraw since there is no any balance you earned from this pool.");
+    }
+}
+
 function createPoolRecord(data){
     var html = "";
 
@@ -976,7 +1109,7 @@ function createPoolRecord(data){
     html += "<input type='text' disabled class='form-control' value='" + data.balanceB + "'/>";
     html += "</div>";
     html += "<div class='footer text-center'>"
-    html += "<button class='btn btn-primary text-uppercase' data-pool='" + data.poolAddress + "' data-bs-toggle='modal' data-bs-target='#withdrawModal'><span class='fa fa-wallet'></span> Withdraw</button>";
+    html += "<button class='btn btn-primary text-uppercase withdrawBtn' data-pool='" + data.poolAddress + "'><span class='fa fa-wallet'></span> Withdraw</button>";
     html += "</div>";
     html += "</div>";
     html += "</div>";
