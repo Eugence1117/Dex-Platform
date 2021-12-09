@@ -7,7 +7,8 @@
         <script src="plugins/bootstrap-5.1.3/js/bootstrap.bundle.min.js" type="text/javascript"></script>
         <link href="plugins/fontawesomepro/css/all.css" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"rel="stylesheet">
-        <link href="css/re-liquidity.css" rel="stylesheet" />        
+        <link href="css/re-liquidity.css" rel="stylesheet" />
+        <link href="plugins/notiflix/notiflix-3.2.2.min.css" rel="stylesheet"/>
         
         <script type="text/javascript">
             function rangeSlide(value) {
@@ -39,7 +40,10 @@
         <body>            
             <div class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark" id="navbar">
                 <div class="container">
-                    <a href="#" class="navbar-brand fw-bolder fs-2">DEX</a>
+                    <a href="index.html" class="navbar-brand d-flex align-items-center">                        
+                        <span class=" fw-bolder fs-2">DEX</span>   
+                    </a>                
+                    
                     <button class="navbar-toggler" type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#navbarResponsive"
@@ -55,7 +59,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="swapMain.html">Swap</a>
+                                <a class="nav-link" href="swap.html">Swap</a>
                             </li>
                         </ul>
                     </div>
@@ -65,6 +69,18 @@
             <div class="wrapper mt-5" style="padding:5em 0.5em">
                 <div class="content-wrapper d-flex align-items-center">
                     <div class="container-fluid">
+                        <div class="row">
+                            <div class="col"></div>
+                            <div class="col-8">
+                                <div class="fa-pull-right d-inline-block">
+                                    <a class="btn a-btn-slide-text btn-outline-light btn-sm btn-block" data-bs-toggle="modal" data-bs-target="#addTokenModal">
+                                        <span class="fas fa-plus-circle" aria-hidden="true"></span>
+                                        <span>Import Token</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col"></div>
+                        </div>
                         <div class="row">
                             <div class="col"></div>
                             <div class="col-8">
@@ -78,125 +94,18 @@
                                                         <span class="fas fa-plus-circle" aria-hidden="true"></span>
                                                         <span>Import Pool</span>
                                                     </a>
-                                                  </div>
+
+                                                    <a class="btn a-btn-slide-text btn-outline-light btn-sm btn-block" id="refreshPoolBtn">
+                                                        <span class="fas fa-sync" aria-hidden="true"></span>
+                                                        <span>Refresh Pool</span>
+                                                    </a>
+                                                </div>
                                             </div>
         
                                             <div id="listLiquidity" class="collapse show" aria-labelledby="listLiquidity">
                                                 <div class="card-body">
-                                                    <ul class="list-group list-group-flush">
-                                                        <li class="list-group-item">
-                                                            <div>
-                                                                <div class="heading">
-                                                                    <h4>BTC / USDC</h4>
-                                                                </div>
-                                                                <div class="body">
-                                                                    <div class="input-group input-group-lg mb-3">
-                                                                        <span class="input-group-text">BTC </span>
-                                                                        <input type="text" disabled class="form-control" value="0.53444"/>
-                                                                    </div>
-                                                                    <div class="input-group input-group-lg mb-3">
-                                                                        <span class="input-group-text">USDC </span>
-                                                                        <input type="text" disabled class="form-control" value="6.55788"/>
-                                                                    </div>
-                                                                    <div class="footer text-center">
-                                                                        <button class="btn btn-primary text-uppercase" data-bs-toggle="modal" data-bs-target="#withdrawModal"><span class="fa fa-wallet"></span> Withdraw</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="list-group-item">
-                                                            <div>
-                                                                <div class="heading">
-                                                                    <h4>BTD / ETH</h4>
-                                                                </div>
-                                                                <div class="body">
-                                                                    <div class="input-group input-group-lg mb-3">
-                                                                        <span class="input-group-text">BTD </span>
-                                                                        <input type="text" disabled class="form-control" value="0.53444"/>
-                                                                    </div>
-                                                                    <div class="input-group input-group-lg mb-3">
-                                                                        <span class="input-group-text">ETH </span>
-                                                                        <input type="text" disabled class="form-control" value="6.55788"/>
-                                                                    </div>
-                                                                    <div class="footer text-center">
-                                                                        <button class="btn btn-primary text-uppercase" data-bs-toggle="modal" data-bs-target="#withdrawModal"><span class="fa fa-wallet"></span> Withdraw</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </li>                                                
-                                                        <li class="list-group-item">
-                                                            <div>
-                                                                <div class="heading">
-                                                                    <h4>DDT / ADD</h4>
-                                                                </div>
-                                                                <div class="body">
-                                                                    <div class="input-group input-group-lg mb-3">
-                                                                        <span class="input-group-text">DDT </span>
-                                                                        <input type="text" disabled class="form-control" value="0.53444"/>
-                                                                    </div>
-                                                                    <div class="input-group input-group-lg mb-3">
-                                                                        <span class="input-group-text">ADD </span>
-                                                                        <input type="text" disabled class="form-control" value="6.55788"/>
-                                                                    </div>
-                                                                    <div class="footer text-center">
-                                                                        <button class="btn btn-primary text-uppercase" data-bs-toggle="modal" data-bs-target="#withdrawModal"><span class="fa fa-wallet"></span> Withdraw</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </li>
+                                                    <ul class="list-group list-group-flush" id="poolGroup">
                                                     </ul>
-                                                    <!-- <div>
-                                                        <div class="listitem">                                                    
-                                                            <div>
-                                                                <span class="token1">
-                                                                    -
-                                                                </span>
-                                                                <span class="token2">
-                                                                    Token 1
-                                                                </span>
-                                                            </div>
-                                                            <div>
-                                                                <span class="token1">
-                                                                    -
-                                                                </span>
-                                                                <span class="token2">
-                                                                    Token 2
-                                                                </span>
-                                                            </div>
-                                                            <div class="withdraw" >
-                                                                <a class="btn a-btn-slide-text btn-outline-red btn-sm btn-block" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-                                                                    <span class="fas fa-minus-circle" aria-hidden="true"></span>
-                                                                    <span>Withdraw</span>
-                                                                </a>
-                                                            </div>
-                                                            
-                                                        </div>
-        
-                                                        <div class="listitem">
-                                                            <div>
-                                                                <span class="token1">
-                                                                    -
-                                                                </span>
-                                                                <span class="token2">
-                                                                    Token 1
-                                                                </span>
-                                                            </div>
-                                                            <div>
-                                                                <span class="token1">
-                                                                    -
-                                                                </span>
-                                                                <span class="token2">
-                                                                    Token 2
-                                                                </span>
-                                                            </div>
-                                                            <div class="withdraw" >
-                                                                <a class="btn a-btn-slide-text btn-outline-red btn-sm btn-block" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-                                                                    <span class="fas fa-minus-circle" aria-hidden="true"></span>
-                                                                    <span>Withdraw</span>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </div> -->
                                                 </div>
                                             </div>
                                         </div>
@@ -216,29 +125,21 @@
                                                             <div class="row mt-2">
                                                                 <div class="col">
                                                                     <div class="input-group">
-                                                                        <select class="btn btn-outline-secondary token form-select input-group-text" name="tokenA">
-                                                                            <option selected>Select a Token</option>
-                                                                            <option value="1">Token 1</option>
-                                                                            <option value="2">Token 2</option>
-                                                                            <option value="3">Token 3</option>
+                                                                        <select class="btn btn-outline-secondary token form-select input-group-text" name="tokenA" data-index="0">
+                                                                            <option selected value="0">No Token</option>
                                                                           </select>
                                                                         <input type="text text-end" class="form-control" placeholder="0.00" name="tokenAVal">
                                                                     </div>                                                        
                                                                 </div>
                                                             </div>
                                                             <div class="row my-4">
-                                                                <div class="col text-center">
-                                                                    <button class="btn btn-lg swap" data-reference="addForm"><i class="fas fa-sort-alt"></i></button>
-                                                                </div>
+
                                                             </div>
                                                             <div class="row mb-2">
                                                                 <div class="col">
                                                                     <div class="input-group">                                                            
-                                                                        <select class="btn btn-outline-secondary token form-select input-group-text" name="tokenB">
-                                                                            <option selected>Select a Token</option>
-                                                                            <option value="1">Token 1</option>
-                                                                            <option value="2">Token 2</option>
-                                                                            <option value="3">Token 3</option>                                                                        
+                                                                        <select class="btn btn-outline-secondary token form-select input-group-text" name="tokenB" data-index="1">
+                                                                            <option selected value="0">No Token</option>                                                                        
                                                                           </select>
                                                                         <input type="text text-end" class="form-control" placeholder="0.00" name="tokenBVal">
                                                                     </div>                                                        
@@ -250,23 +151,23 @@
                                                                         <div class="col mb-4">
                                                                             <div class="card">
                                                                                 <div class="card-body">
-                                                                                    <p>0.0000147107</p>
-                                                                                    <span>BCN <span>per</span> ALPACA</span>
+                                                                                    <p class="ratioAB">0</p>
+                                                                                    <span class="tokenA"> </span> per <span class="tokenB"></span>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
                                                                         <div class="col mb-4">
                                                                             <div class="card">
                                                                                 <div class="card-body">
-                                                                                    <p>67977.7</p>
-                                                                                    <span>ALPACA <span>per</span> BCN</span>
+                                                                                    <p class="ratioAB">0</p>
+                                                                                    <span class="tokenB"> </span> per <span class="tokenA"></span>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
                                                                         <div class="col mb-4">
                                                                             <div class="card">
                                                                                 <div class="card-body">
-                                                                                    <p>99.98%</p>
+                                                                                    <p>00.00%</p>
                                                                                     <span>Share of Pool</span>
                                                                                 </div>
                                                                             </div>
@@ -275,7 +176,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="footer text-center">
-                                                                <button class="btn btn-primary text-uppercase"><i class="fas fa-donate"></i> Fund This Pool</button>
+                                                                <button class="btn btn-primary text-uppercase" id="fundBtn"><i class="fas fa-donate"></i> Fund This Pool</button>
                                                             </div>
                                                         </div>
                                                     </form>                                                    
@@ -298,30 +199,21 @@
                                                             <div class="row mt-2">
                                                                 <div class="col">
                                                                     <div class="input-group">
-                                                                        <select class="btn btn-outline-secondary token form-select input-group-text" name="tokenA">
-                                                                            <option selected>Select a Token</option>
-                                                                            <option value="1">Token 1</option>
-                                                                            <option value="2">Token 2</option>
-                                                                            <option value="3">Token 3</option>
+                                                                        <select class="btn btn-outline-secondary token form-select input-group-text" name="tokenA" data-index="0">
+                                                                            <option selected value="0">No Token</option>
                                                                         </select>
                                                                     <input type="text text-end" class="form-control" placeholder="0.00" name="tokenAVal">
                                                                 </div>                                                        
                                                             </div>
                                                         </div>
                                                         <div class="row my-4">
-                                                            <div class="col text-center">
-                                                                <button class="btn btn-lg swap" data-reference="newForm"><i class="fas fa-sort-alt"></i></button>
-                                                            </div>
                                                         </div>
                                                         <div class="row mb-2">
                                                             <div class="col">
                                                                 <div class="input-group">                                                            
-                                                                    <select class="btn btn-outline-secondary token form-select input-group-text" name="tokenB">
-                                                                        <option selected>Select a Token</option>
-                                                                        <option value="1">Token 1</option>
-                                                                        <option value="2">Token 2</option>
-                                                                        <option value="3">Token 3</option>
-                                                                        </select>
+                                                                    <select class="btn btn-outline-secondary token form-select input-group-text" name="tokenB" data-index="1">
+                                                                        <option selected value="0">No Token</option>
+                                                                    </select>
                                                                     <input type="text text-end" class="form-control" placeholder="0.00" name="tokenBVal">
                                                                 </div>                                                        
                                                             </div>
@@ -332,32 +224,24 @@
                                                                     <div class="col mb-4">
                                                                         <div class="card">
                                                                             <div class="card-body">
-                                                                                <p>0.0000147107</p>
-                                                                                <span>BCN <span>per</span> ALPACA</span>
+                                                                                <p class="ratioAB">0</p>
+                                                                                <span class="tokenA"> </span> per <span class="tokenB"></span>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col mb-4">
                                                                         <div class="card">
                                                                             <div class="card-body">
-                                                                                <p>67977.7</p>
-                                                                                <span>ALPACA <span>per</span> BCN</span>
+                                                                                <p class="ratioBA">0</p>
+                                                                                <span class="tokenB"> </span> per <span class="tokenA"></span>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col mb-4">
-                                                                        <div class="card">
-                                                                            <div class="card-body">
-                                                                                <p>99.98%</p>
-                                                                                <span>Share of Pool</span>
-                                                                            </div>
-                                                                        </div>
-                                                                     </div>
                                                                   </div>
                                                             </div>
                                                          </div>
                                                         <div class="footer text-center">
-                                                            <button class="btn btn-primary text-uppercase"><i class="fas fa-plus"></i> Create Pool</button>
+                                                            <button class="btn btn-primary text-uppercase" id="createBtn"><i class="fas fa-plus"></i> Create Pool</button>
                                                         </div>
                                                     </form>                                                    
                                                 </div>
@@ -375,41 +259,45 @@
 
             <div class="modal fade" tabindex="-1" role="dialog" id="addPoolModal">
                 <div class="modal-dialog modal-dialog-centered" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">Import Pool</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">                        
-                      </button>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Import Pool</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addPoolForm">
+                                <input type="text" class="form-control" placeholder="0x0000" id="poolAddress" name="poolAddress" />
+                            </form> 
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary mb-3" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary mb-3" id="addPoolBtn">Import</button>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                      <input type="text" class="form-control" placeholder="0x0000"/>
-                    </div>
-                    <div class="modal-footer">                      
-                      <button type="button" class="btn btn-secondary mb-3" data-bs-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary mb-3">Import</button>
-                    </div>
-                  </div>
                 </div>
-              </div>
+            </div>
 
-              <div class="modal fade" tabindex="-1" role="dialog" id="addTokenModal">
+            <div class="modal fade" tabindex="-1" role="dialog" id="addTokenModal">
                 <div class="modal-dialog modal-dialog-centered" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">Import Token</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">                        
-                      </button>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Import Token</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addTokenForm">
+                                <input type="text" class="form-control" placeholder="0x0000" id="tokenAddress" name="tokenAddress" />
+                            </form> 
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary mb-3" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary mb-3" id="addTokenBtn">Import</button>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                      <input type="text" class="form-control" placeholder="0x0000"/>
-                    </div>
-                    <div class="modal-footer">                      
-                      <button type="button" class="btn btn-secondary mb-3" data-bs-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary mb-3">Import</button>
-                    </div>
-                  </div>
                 </div>
-              </div>
+            </div>
 
               <div class="modal fade" tabindex="-1" role="dialog" id="withdrawModal">
                 <div class="modal-dialog modal-dialog-centered" role="document">
@@ -421,59 +309,56 @@
                     </div>
                     <div class="modal-body">
                         <div class="section">
-                            <table>
-                                <tr>
-                                    <td>Amount</td>
-                                    <td style="float: right;">Detailed</td>
-                                </tr>
-                            </table>
-                            <div class="slider">
+                            <div class="p-2">
                                 <span id="rangeValue">0 </span><span style="display: inline-block;">%</span>
-                                <Input class="range" type="range" name "" value="0" min="0" max="100" onChange="rangeSlide(this.value)" 
+                                <Input class="range" name="tokenCount" type="range" value="0" min="0" max="100" onChange="rangeSlide(this.value)" 
                             onmousemove="rangeSlide(this.value)"></Input>
+                            </div>
+                            <div class="row p-2">
+                                <div class="col-md">
+                                    <span>Token Spend :</span>
+                                </div>
+                                <div class="col-md text-end">
+                                    <span id="tokenSpend">0 LPT</span>
+                                </div>
                             </div>
                         </div>
                         <div class="my-3 text-center">
-                            <h3><span class="fas fa-angle-double-down"></span></h3>
-                            <!-- <img src="../image/arrow-down-pink.png" width="24px" height="24px"> -->
+                            <h3><span class="fas fa-angle-double-down"></span></h3>                            
                         </div>
                         <div class="section">
-                            <table>
-                                <tr>
-                                  <td>-</td>
-                                  <td style="text-align: right;">Token1</td>
-                                </tr>
-                                <tr >
-                                  <td>-</td>
-                                  <td style="text-align: right;">Token2</td>
-                                </tr>
-                            </table>
-                            <div class="msg">Receive WBNB</div>
-                        </div>
-                        <div class="btmsection">
-                            <table>
-                                <tr>
-                                  <td><div>Price : </div></td>
-                                  <td style="text-align: right;">
-                                    <div >
-                                        1BGOV = 0.00026312 BNB 
-                                    </div>
-                                    <div>
-                                        1BNB = 3800.55 BGOV
-                                    </div>
-                                  </td>
-                                </tr>
-                            </table>
+                            <div class="row p-3">
+                                <div class="col-md tokenA">
+                                    Token A
+                                </div>
+                                <div class="col-md text-end tokenAVal">
+                                    0.000000
+                                </div>
+                            </div>
+                            <div class="row p-3">
+                                <div class="col-md tokenB">
+                                    Token B
+                                </div>
+                                <div class="col-md text-end tokenBVal">
+                                    0.000000
+                                </div>
+                            </div>                            
                         </div>
                     </div>
                     <div class="modal-footer">                      
                       <button type="button" class="btn btn-secondary mb-3" data-bs-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary mb-3">Remove</button>
+                      <button type="button" class="btn btn-primary mb-3" id="withdrawBtn">Withdraw</button>
                     </div>
                   </div>
                 </div>
               </div>
         </body>
+        <script type="text/javascript" src="plugins/notiflix/notiflix-3.2.2.min.js"></script>
+        <script type="text/javascript" src="js/web3.min.js"></script>
+        <script type="text/javascript" src="js/truffle-contract.js"></script>        
+        <script type="text/javascript" src="js/app.js"></script>    
+        <script type="text/javascript" src="plugins/jquery-validator/jquery-validate-min.js"></script>
+        <script type="text/javascript" src="js/validator-config.js"></script>        
 
         <script>
             $(".swap").on('click',function(e){
@@ -493,5 +378,130 @@
                 to.val(buffer);
                 toVal.val(bufferVal); 
             });
+
+            $("#addPoolForm").validate({
+                rules:{
+                    poolAddress:{
+                        required:true
+                    }
+                }
+            });
+
+            $("#addTokenForm").validate({
+                rules:{
+                    tokenAddress:{
+                        required:true
+                    }
+                }
+            });
+
+            $("#addForm").validate({
+                rules:{
+                    tokenA:{
+                        SelectFormat:true,
+                        required:true
+                    },
+                    tokenB:{
+                        SelectFormat:true,
+                        required:true
+                    },
+                    tokenAVal:{
+                        number:true,  
+                        required:true
+                    },
+                    tokenBVal:{
+                        number:true,  
+                        required:true
+                    }
+                }
+            })   
+            
+            $("#newForm").validate({
+                rules:{
+                    tokenA:{
+                        SelectFormat:true,
+                        required:true
+                    },
+                    tokenB:{
+                        SelectFormat:true,
+                        required:true
+                    },
+                    tokenAVal:{
+                        number:true,  
+                        required:true
+                    },
+                    tokenBVal:{
+                        number:true,  
+                        required:true
+                    }
+                }
+            })   
+            
+            $("#addPoolModal").on('hidden.bs.modal',function(){
+                //Clear Input Field
+                $("input[name=poolAddress]").val("");
+                $("input[name=poolAddress]").removeClass("is-invalid").removeClass("is-valid");
+            })
+
+            $(".token").on('change',function(){
+                var previousToken = $(this).data("prev");                
+                
+                var form = $(this).closest('form').attr('id');
+                
+                //FIND the closest select
+                var tokensSelect = $("#"+form).find("select.token");
+                var tokenA = $(this);
+                var tokenB = null
+                for(var i = 0; i < tokensSelect.length; i++){
+                    if($(tokensSelect[i]).attr('name') !== $(this).attr("name")){
+                        tokenB = $(tokensSelect[i]);
+                    }
+                }
+
+                if(tokenB != null){
+                    //Changing Token A Value
+                    if(tokenB.val() == tokenA.val()){
+                        tokenB.val(previousToken);
+                        tokenB.data("prev",previousToken);
+                    }                    
+                }                
+                $(this).data("prev",$(this).val());
+
+                //Change Message
+                
+                tokenA = $("#"+form).find("select[name=tokenA]").val();
+                tokenB = $("#"+form).find("select[name=tokenB]").val();
+                
+                $("#"+ form + " .tokenA").text(App.tokens.get(tokenA).symbol);
+                $("#"+form + " .tokenB").text(App.tokens.get(tokenB).symbol);
+                
+            })
+
+            // $(function () {
+            //     $(window).on('load', function () {
+            //         App.init();
+            //     });
+            // });
+
+
+            $(document).ready(function(){
+                App.init();
+                initUI();
+            })
+
+            function initUI(){
+                
+                var tokenA = $("#addForm").find("select[name=tokenA]").val();
+                var tokenB = $("#addForm").find("select[name=tokenB]").val();
+
+                $("#addForm .tokenA").text(App.tokens.get(tokenA).symbol);
+                $("#addForm .tokenB").text(App.tokens.get(tokenB).symbol);
+
+                tokenA = $("#newForm").find("select[name=tokenA]").val();
+                tokenB = $("#newForm").find("select[name=tokenB]").val();
+
+                $("#newForm .tokenA").text(App.tokens.get(tokenA).symbol);
+                $("#newForm .tokenB").text(App.tokens.get(tokenB).symbol);
+            }
         </script>
     </html>
