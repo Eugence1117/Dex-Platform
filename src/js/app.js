@@ -102,9 +102,9 @@ App = {
             App.checkBalances("0xf171469d7cCdda0b7641e230e6a4c2eF98779e0e", 100);
         })
 
-        $("#refreshPoolBtn").on('click',function(){
-            App.refreshPool().then(function(){
-                const cookie = getCookie("pools")
+        $("#refreshPoolBtn").on('click',async function(){
+            await App.refreshPool().then(function(){
+                const cookie = getCookie("pools");
                 if(cookie != ""){
                     const pools = JSON.parse(cookie);      
                     $("#poolGroup").html("");
@@ -149,13 +149,28 @@ App = {
             }
         })
 
-        $("#fundBtn").on("click",function(e){
+        $("#fundBtn").on("click",async function(e){
             e.preventDefault();
 
             var validator = $( "#addForm" ).validate();
 			if(!validator.form()){
 				return false;
 			}                
+            await calculateFundAmount.call($("#addForm input[name=tokenAVal]"));
+
+            const tokenA = $("#addForm select[name=tokenA]").val();
+            const tokenB = $("#addForm select[name=tokenB]").val();
+
+            var valA = $("#addForm input[name=tokenAVal]").val();
+            var valB = $("#addForm input[name=tokenBVal]").val();
+            
+            const tokenAObj = App.tokens.get(tokenA);
+            valA = valA * (10 ** tokenAObj.decimal);
+            
+            const tokenBObj = App.tokens.get(tokenB);
+            valB = valB * (10 ** tokenBObj.decimal);
+            
+            App.fundPool(tokenA,tokenB,valA,valB);            
         });
         
         $("#newForm input[name=tokenAVal]").on('input',function(){
@@ -224,7 +239,63 @@ App = {
             $("#withdrawModal .tokenAVal").text("0");
             $("#withdrawModal .tokenBVal").text("0");
         })
-        //SET all the event listener here
+
+        var calculateFundAmount = async function(){            
+            var tokenAAddress = $(this).siblings('.token').val();
+            var tokenAmount = $(this).val();
+            
+            if(tokenAmount != "" && tokenAmount > 0){                
+                var tokenElement = $(this).siblings('.token').attr('name');
+                var tokenBVal = null;
+                var tokenBAddress = null;
+                $("#addForm select").each(function(){
+                    if($(this).attr('name') != tokenElement){
+                        tokenBAddress = $(this).val()  
+                        tokenBVal = $(this).siblings("input");
+                    }                
+                })
+
+                const tokenA = App.tokens.get(tokenAAddress);
+                var result = await App.estFundPool(tokenAAddress,tokenBAddress,tokenAmount * (10 ** tokenA.decimal));
+                if(result != null){                    
+                    const tokenB = App.tokens.get(tokenBAddress);
+                    const tokenBAmount = (result[0].toNumber() / (10 ** tokenB.decimal))
+                    tokenBVal.val(tokenBAmount);
+                    $("#addForm .percentage").text((result[1].toNumber() / 100).toFixed(2) + " %")
+                    
+                    if(tokenBVal.attr('name') == "tokenBVal"){
+                        //A B
+                        $("#addForm .ratioAB").text((tokenAmount / tokenBAmount).toFixed(tokenA.decimal));
+                        $("#addForm .ratioBA").text((tokenBAmount / tokenAmount).toFixed(tokenB.decimal));
+                    }
+                    else{
+                        //B A
+                        $("#addForm .ratioBA").text((tokenAmount / tokenBAmount).toFixed(tokenA.decimal));
+                        $("#addForm .ratioAB").text((tokenBAmount / tokenAmount).toFixed(tokenB.decimal));
+                    }
+                    $("#fundBtn").attr("disabled",false);
+                }
+                else{
+                    $("#addForm input").val("");
+                    $("#addForm .ratioBA").text(0);
+                    $("#addForm .ratioAB").text(0);
+                    $("#addForm .percentage").text((0).toFixed(2) + " %")
+                }
+            }
+            else{
+                $("#addForm input").val("");
+                $("#addForm .percentage").text((0).toFixed(2) + " %")
+
+                $("#fundBtn").attr("disabled",true);
+            }           
+        }
+        
+        $("#addForm input[name=tokenAVal]").on('input',calculateFundAmount);
+        $("#addForm input[name=tokenBVal]").on('input',calculateFundAmount);
+        $("#addForm select").on('change',function(){
+            var inputElement = $(this).siblings('input');
+            inputElement.trigger('input');
+        });
 
         //FOR CREATE POOL AND FUND POOl, calculate when user enter value
 
@@ -257,16 +328,61 @@ App = {
 
         }
     },
-    fundPool: function (tokenA, tokenB, amountA) {
-        if (tokenA == tokenB) {
+    fundPool: async function (tokenA, tokenB, amountA, amountB) {
+        if (tokenA == tokenB || tokenA == "" || tokenB == "") {
             Notiflix.Notify.warning("Invalid Request. Validation Needed");
             return false;
-        } else if (tokenAmount <= 0) {
+        } else if (amountA <= 0 || amountB <= 0) {
             Notiflix.Notify.warning("Invalid Request. Validation Needed");
             return false;
         }
-        else {
+        else {            
+            Notiflix.Loading.circle("Waiting the transaction to finish...");
+            var tokens = [];
 
+            var token = {};
+            token.address = tokenA;
+            token.amount = amountA;
+            tokens.push(token);
+
+            token = {};
+            token.address = tokenB;
+            token.amount = amountB;
+            tokens.push(token);
+
+            try{
+                await App.addToken(tokenA,tokenB);
+
+                await App.authorizeContract(tokens).then(async function(result) {
+                    if(result){                        
+                        var isSuccess = await App.contracts.dex.deployed().then(function(ins){
+                            return ins.fundLiquidityPool(tokenA,tokenB,amountA,{from:ethereum.selectedAddress}).then(result => {
+                                return true;
+                            })
+                        });
+                        Notiflix.Loading.remove();
+                        Notiflix.Notify.success("Transaction Completed.");                        
+                    }
+                    else{
+                        Notiflix.Loading.remove();
+                        Notiflix.Notify.failure("Error occured when authorizing contract.");
+                        return null;                
+                    }                   
+                })
+                .catch(function(error){
+                    Notiflix.Loading.remove();
+                    if(e.code == 4001){
+                        Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
+                    }                
+                    else{
+                        Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
+                    }
+                });  
+            }
+            catch(e){
+                Notiflix.Loading.remove();
+                console.error(e)
+            };                      
         }
     },
     addNewPool: function (tokenA, tokenB, amountA, amountB) {
@@ -286,6 +402,7 @@ App = {
                 var isExist = result[0];
                 var poolId = result[1];                
                 if(!isExist){     
+                    Notiflix.Loading.circle("Waiting the transaction to finish...");
                     return App.addToken(tokenA,tokenB).then(result => {                        
                         var tokens = [];
 
@@ -303,13 +420,16 @@ App = {
                         return App.authorizeContract(tokens).then(result => {
                             if(result){
                                 return instance.addLiquidityPool(tokenA,tokenB,amountA,amountB,{from:ethereum.selectedAddress}).then(result =>{
+                                    Notiflix.Loading.remove();      
+                                    Notiflix.Notify.success("Pool created.");                                                                           
                                     return poolId;
-                                });
+                                });                                
                             }
                             else{
+                                Notiflix.Loading.remove();                                             
                                 Notiflix.Notify.failure("Error occured when authorizing contract.");
                                 return null;
-                            }                                                
+                            }                               
                         })
                     });                
                 }
@@ -319,13 +439,11 @@ App = {
                     return null;
                 }                
             }).then(async function(poolAddress){
-                console.log(poolAddress);
                 if(poolAddress != null){
-
-                    console.log("Pool Address: " + poolAddress);
                     await App.importPool(poolAddress,false);                    
                 }
             }).catch(function (e) {
+                Notiflix.Loading.remove();   
                 console.log(e);
                 if(e.code == 4001){
                     Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
@@ -352,7 +470,8 @@ App = {
             token.address = poolToken;
             var tokens = [token];            
 
-            try{
+            Notiflix.Loading.circle("Waiting the transaction to finish...");
+            try{                
                 var isSuccess = await App.authorizeContract(tokens);
                 if(isSuccess){
                     var dexInstance = await App.contracts.dex.deployed().then(function(ins){
@@ -361,12 +480,14 @@ App = {
 
                     await dexInstance.withdrawFund(poolAddress,amount,{from:ethereum.selectedAddress});
 
-                    Notiflix.Notify.info("Fund withdraw successfully.");
+                    Notiflix.Loading.remove();
+                    Notiflix.Notify.success("Fund withdraw successfully.");
                     $("#withdrawModal").modal("hide");
                 }
             }
             catch(e){
-                console.error("Action cancelled");
+                Notiflix.Loading.remove();
+                Notiflix.Notify.failure("Unexpected error occured.");                
                 console.log(e);
             }
         
@@ -379,13 +500,13 @@ App = {
         });
 
         const pool = App.pools.get(poolAddress);
-        console.log(pool);
         var balances = (await dexInstance.checkBalances.call(pool.poolToken,{from:ethereum.selectedAddress})).toNumber();
         if(typeof App.tokens.get(pool.poolToken) == "undefined"){
             await App.importToken(pool.poolToken,false);
         }
         const token = App.tokens.get(pool.poolToken);
 
+        console.log("Balances"+balances)
         balances = balances / (10 ** token.decimal);
         
         const defaultValue = (0).toFixed(token.decimal);
@@ -394,7 +515,6 @@ App = {
         $("#rangeValue").text("0 ");
         $("#tokenSpend").text(defaultValue + " " + token.symbol);
         
-        console.log(pool.addressTokenA)
         if(typeof App.tokens.get(pool.addressTokenA) == "undefined"){
             await App.importToken(pool.addressTokenA,false);
         }
@@ -437,16 +557,38 @@ App = {
             }
         })
     },
-    estFundPool: function (tokenA,tokenB,tokenAmount) {
+    estFundPool: async function (tokenA,tokenB,tokenAmount) {
         if (tokenA == tokenB) {
             Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
+            return null;
         } else if (tokenAmount <= 0) {
             Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
+            return null;
         }
         else {
-
+            try{
+                var instance = await App.contracts.dex.deployed().then(function(ins){
+                    return ins;
+                });
+    
+                return instance.isPoolExist.call(tokenA,tokenB).then(result => {
+                    if(!result[0]){
+                        Notiflix.Notify.failure("Pool is not created.");
+                        return null;
+                    }
+                    else{
+                        var poolAddress = result[1];
+                        return instance.estFundPool.call(tokenA,tokenB,tokenAmount).then(result =>{
+                            return result;
+                        })                        
+                    }
+                })
+            }   
+            catch(error){
+                console.error(error);
+                Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
+                return null;
+            }
         }
     },
     estSwap: function (tokenA, tokenB, amount) {        
@@ -524,7 +666,8 @@ App = {
         }else{
             var instance;
             $("#refreshPoolBtn .fas").addClass("spin");
-            App.contracts.dex.deployed().then(function (ins) {
+            $("#refreshPoolBtn").attr("disabled",true);
+            await App.contracts.dex.deployed().then(function (ins) {
                 instance = ins;
             }).then(async function(){
                 var cookie = getCookie("pools");
@@ -541,7 +684,11 @@ App = {
 
                         pools[i].balanceA = (balanceA / (10 ** tokenADecimal)).toFixed(tokenADecimal);
                         pools[i].balanceB = (balanceB / (10 ** tokenBDecimal)).toFixed(tokenBDecimal);
-                    }
+
+                        App.pools.set(pools[i].poolAddress,pools[i]);
+                    }                  
+                    $("#refreshPoolBtn .fas").removeClass("spin"); 
+                    $("#refreshPoolBtn").attr("disabled",false); 
                     setCookie(pools,"pools")                
                 }                
             });                    
@@ -620,7 +767,7 @@ App = {
                                 pools = JSON.parse(cookie);
                                 for(var i = 0 ; i < pools.length; i++){
                                     if(pools[i].poolAddress == pool.poolAddress){
-                                        pools[i].balanceA = pool.balanceB;
+                                        pools[i].balanceA = pool.balanceA;
                                         pools[i].balanceB = pool.balanceB;
                                         isAdded = true;
                                     }
@@ -967,10 +1114,10 @@ App = {
                 return ins.address;
             })                      
 
-            try{
+            try{               
                 var isApprove = true;
                 for(var i = 0 ; i < tokens.length ; i++){
-                    isApprove = await App.contracts.token.at(tokens[i].address).then(async function (ins) {                      
+                    isApprove = await App.contracts.token.at(tokens[i].address).then(async function (ins) {                                         
                         if((await ins.allowance.call(ethereum.selectedAddress,contractAddress)).toNumber() < tokens[i].amount){
                             return ins.approve(contractAddress,tokens[i].amount,{'from': ethereum.selectedAddress});            
                         }           

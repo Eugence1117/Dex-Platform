@@ -32,33 +32,47 @@ contract dex{
     }
     //END
 
-    function fundLiquidityPool(address payable token1, address payable token2, uint token1Amount) public payable returns(address){
+    function fundLiquidityPool(address payable token1, address payable token2, uint token1Amount) public payable{
         require(token1 != token2,"Invalid pool");    
         address poolAddress = generatePoolId(token1,token2);
         require(isPoolExist(poolAddress),"Pool is not exist, please create a new pool.");        
-        
-        uint token2Amount = computePrice(liquidityPool[poolAddress].token1Balance,liquidityPool[poolAddress].token2Balance,token1Amount);  
+        require(token1Amount > 0, "Amount to fund must greater than 0.");
+                
+        uint token2Amount;
+        if(token1 == liquidityPool[poolAddress].token1){
+            uint tokenABalance = liquidityPool[poolAddress].token1Balance;
+            uint tokenBBalance = liquidityPool[poolAddress].token2Balance;
 
-        liquidityPool[poolAddress].token2Balance += token2Amount;
-        liquidityPool[poolAddress].token1Balance += token1Amount;
+            token2Amount = computePrice(tokenABalance,tokenBBalance,token1Amount); 
+                     
+            liquidityPool[poolAddress].token1Balance += token1Amount;                    
+            liquidityPool[poolAddress].token2Balance += token2Amount;   
+        }
+        else{
+            uint tokenABalance = liquidityPool[poolAddress].token2Balance;
+            uint tokenBBalance = liquidityPool[poolAddress].token1Balance;            
+
+            token2Amount = computePrice(tokenABalance,tokenBBalance,token1Amount);
+
+            liquidityPool[poolAddress].token2Balance += token1Amount;            
+            liquidityPool[poolAddress].token1Balance += token2Amount;
+        } 
 
         //Add liquidity
         ERC20Interface poolToken = ERC20Interface(liquidityPool[poolAddress].poolToken);
-        
+                
         uint tokenReceived = calculateLPToken(false,token1Amount,token2Amount,liquidityPool[poolAddress].token1Balance,liquidityPool[poolAddress].token2Balance,poolToken.totalSupply());
               
         require(poolToken.mint(msg.sender,tokenReceived),"Transaction failed.");
-        //require(poolToken.transfer(msg.sender,tokenReceived),"Transaction failed.");
 
         ERC20Interface tokenA = ERC20Interface(token1);
         ERC20Interface tokenB = ERC20Interface(token2);
 
         tokenA.transferFrom(msg.sender, address(this),token1Amount);
         tokenB.transferFrom(msg.sender, address(this),token2Amount);
-        return poolAddress;
     }
 
-    function addLiquidityPool(address payable token1, address payable token2, uint token1Amount, uint token2Amount) public payable returns(address,address){
+    function addLiquidityPool(address payable token1, address payable token2, uint token1Amount, uint token2Amount) public payable{
         require(token1 != token2,"Invalid liquidity pool.");
         address poolAddress = generatePoolId(token1,token2);
 
@@ -82,8 +96,6 @@ contract dex{
         liquidityPool[poolAddress] = Pool(address(poolToken),token1,token2,token1Amount,token2Amount,true);        
         require(poolToken.mint(msg.sender,tokenReceived),"Transaction failed.");
         
-        //console.log("Progress", "Liquidity Pool created.");
-        return (poolAddress,address(poolToken));
     }
 
     function convertLPTokenToToken(uint lpAmount, uint totalSupply, uint tokenReserve)public pure returns(uint){
@@ -122,7 +134,7 @@ contract dex{
             return amount;
         }
         else{
-            return amount * x / y;     
+            return amount * y / x;     
         }        
     }
 
@@ -203,18 +215,24 @@ contract dex{
         return difference;
     }
 
-    function estFundPool(address tokenA, address tokenB, uint amount)public view returns(uint amount2,address token2, uint share){
+    function estFundPool(address tokenA, address tokenB, uint amount)public view returns(uint amount2, uint share){
         require(tokenA != tokenB,"Invalid Pool");
         address poolAddress = generatePoolId(tokenA,tokenB);
         require(isPoolExist(poolAddress),"Pool is not exist.");        
-        
-        uint token2Amount = computePrice(liquidityPool[poolAddress].token1Balance,liquidityPool[poolAddress].token2Balance,amount);  
 
-        ERC20Interface poolToken = ERC20Interface(liquidityPool[poolAddress].poolToken);
-        uint tokenReceived = calculateLPToken(false,amount,token2Amount,liquidityPool[poolAddress].token1Balance,liquidityPool[poolAddress].token2Balance,poolToken.totalSupply());
-
-        return (token2Amount,tokenB,tokenReceived * 1000 / poolToken.totalSupply());
-        //Return Amount Need To import for B, Address of B, And share in percentage (0 stands for < 0.01%)
+        uint tokenABalance;
+        uint tokenBBalance;        
+        if(tokenA == liquidityPool[poolAddress].token1){
+            tokenABalance = liquidityPool[poolAddress].token1Balance;
+            tokenBBalance = liquidityPool[poolAddress].token2Balance;         
+        }
+        else{
+            tokenABalance = liquidityPool[poolAddress].token2Balance;
+            tokenBBalance = liquidityPool[poolAddress].token1Balance;            
+        }        
+        uint token2Amount = computePrice(tokenABalance,tokenBBalance,amount);  
+        return (token2Amount,(amount * 10000) / (tokenABalance + amount));
+        //Return Amount Need To import for B, share in percentage (0 stands for < 0.01%)
     }
 
     function estWithdrawFund(address pool, uint amount)public view returns(uint amount1,uint amount2,address token1,address token2){
