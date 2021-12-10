@@ -17,6 +17,15 @@
         </script>
 
         <style>
+            .custom-token-col,
+            .custom-form {
+            padding: 20px 14px;
+            padding-bottom: 0px;
+            background-color: rgba(0, 0, 0, 0.3);
+            margin: 3px auto;
+            border-radius: 28px;
+            }
+
             .token{
                 max-width:15%;
             }
@@ -66,7 +75,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="swap.html">Swap</a>
+                                <a class="nav-link" href="index.html">Swap</a>
                             </li>
                         </ul>
                         <button class="btn btn-secondary fa-pull-right" id="connectWallet">
@@ -504,7 +513,6 @@
             })
 
             ethereum.on('accountsChanged', (accounts) => {
-                console.log(accounts);
                 if(accounts.length > 0){
                     $("#connectWallet").attr("disabled",true);
                     $("#connectWallet").text("Wallet Connected");

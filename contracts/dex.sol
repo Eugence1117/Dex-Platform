@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./token.sol";
-//import "hardhat/console.sol";
 
 contract dex{
     struct Pool{
@@ -30,7 +29,7 @@ contract dex{
         address poolId = generatePoolId(tokenA,tokenB);
         return (isPoolExist(poolId),poolId);
     }
-    //END
+    
 
     function fundLiquidityPool(address payable token1, address payable token2, uint token1Amount) public payable{
         require(token1 != token2,"Invalid pool");    
@@ -122,30 +121,19 @@ contract dex{
         return (token1Received,token2Received);       
     }
 
-    function isPoolExist(address _address) private view returns(bool){
-        Pool memory pool = liquidityPool[_address];
-        return pool.isAdded;        
+    function isPoolExist(address _address) private view returns(bool){        
+        return liquidityPool[_address].isAdded;        
     }
 
     //PURE FUNCTION
     //Retrieve amount of y 
     function computePrice(uint256 x, uint256 y, uint256 amount) public pure returns(uint256){
-        if(x == 0 && y == 0){   
-            return amount;
-        }
-        else{
-            return amount * y / x;     
-        }        
+        return (x == 0 && y == 0 ) ? amount : amount * y / x;     
     }
 
     function generatePoolId(address tokenA, address tokenB) public pure returns (address){
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);        
         return address(uint160(uint256(keccak256(abi.encodePacked(token0, token1)))));  
-    }
-
-    
-    function calculateInterest(uint tokenAmount,uint poolAmount,uint accumulatedInterest)public pure returns(uint){
-        return tokenAmount * accumulatedInterest / poolAmount;        
     }
 
     function calculateLPToken(bool isInitiator, uint token1Amount, uint token2Amount, uint token1Reserve, uint token2Reserve, uint totalSupply)public pure returns(uint){
@@ -179,6 +167,7 @@ contract dex{
 
     function swap(address fromToken, address toToken, uint256 tokenX) public payable{
         //Step 1: Select pool
+        require(fromToken != toToken,"Invalid Pair of Token");
         address poolID = generatePoolId(fromToken, toToken);
         require(liquidityPool[poolID].isAdded,"Liquidity Pool not found.");
 
@@ -192,7 +181,18 @@ contract dex{
         require(tokenX <= tokenFrom.allowance(msg.sender,address(this)),"Not enough token");
 
         //Step 3.1: Calculate different between y-(k/x)
-        uint difference = liquidityPool[poolID].token2Balance - (k/(liquidityPool[poolID].token1Balance+tokenX));
+        uint balanceFrom;
+        uint balanceTo; 
+        if(liquidityPool[poolID].token1 == fromToken){
+            balanceFrom = liquidityPool[poolID].token1Balance;
+            balanceTo = liquidityPool[poolID].token2Balance;
+        }
+        else{
+            balanceFrom = liquidityPool[poolID].token2Balance;
+            balanceTo = liquidityPool[poolID].token1Balance;
+        }
+
+        uint difference = balanceTo - (k/(balanceFrom+tokenX));
                 
         //Step 3.2: Transfer the amount of difference from pool to user account
         require(tokenTo.transfer(msg.sender, difference),"Transaction failed."); //transfer
@@ -201,18 +201,35 @@ contract dex{
         require(tokenFrom.transferFrom(msg.sender, address(this), tokenX),"Transaction failed"); //transferfrom
             
 	    //Step 3.4: update pool's token value
-        liquidityPool[poolID].token1Balance += tokenX; //plus because we add in the tokenX into Pool
-        liquidityPool[poolID].token2Balance -= difference; //minus because we already take the tokenY        
+        if(liquidityPool[poolID].token1 == fromToken){
+            liquidityPool[poolID].token1Balance += tokenX; //plus because we add in the tokenX into Pool
+            liquidityPool[poolID].token2Balance -= difference; //minus because we already take the tokenY       
+        }
+        else{
+            liquidityPool[poolID].token2Balance += tokenX;
+            liquidityPool[poolID].token1Balance -= difference;     
+        }         
     }
 
     function estSwap(address fromToken,address toToken, uint256 tokenX)public view returns(uint){
         address poolID = generatePoolId(fromToken, toToken);
         require(liquidityPool[poolID].isAdded,"Liquidity Pool not found.");
         
+
         uint k = liquidityPool[poolID].token1Balance * liquidityPool[poolID].token2Balance;
-                
-        uint difference = liquidityPool[poolID].token2Balance - (k/(liquidityPool[poolID].token1Balance+tokenX));
-        return difference;
+
+        uint balanceFrom;
+        uint balanceTo; 
+        if(liquidityPool[poolID].token1 == fromToken){
+            balanceFrom = liquidityPool[poolID].token1Balance;
+            balanceTo = liquidityPool[poolID].token2Balance;
+        }
+        else{
+            balanceFrom = liquidityPool[poolID].token2Balance;
+            balanceTo = liquidityPool[poolID].token1Balance;
+        }
+
+        return (balanceTo - (k/(balanceFrom+tokenX)));        
     }
 
     function estFundPool(address tokenA, address tokenB, uint amount)public view returns(uint amount2, uint share){
