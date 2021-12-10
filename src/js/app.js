@@ -1177,7 +1177,7 @@ App = {
             return result.toNumber() > 0;
         }).catch(error => {
             console.error(error);
-            return 0;
+            return false;
         })
     }    
 }

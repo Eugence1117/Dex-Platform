@@ -27,3 +27,12 @@ $.validator.addMethod('SelectFormat',function(value,element){
         return true;
     }
 },'Please select an option.')
+
+$.validator.addMethod('ValidAmount',function(value,element){
+    if(value <= 0){
+        return false;
+    }
+    else{
+        return true;
+    }
+},'Please enter a number that is greater than 0.')
