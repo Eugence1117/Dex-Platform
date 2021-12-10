@@ -22,6 +22,9 @@
       margin: 3px auto;
       border-radius: 28px;
     }
+    .notiflix-confirm-buttons > a {
+      text-decoration: none;
+    }
 
     .custom-form {
       padding-top: 13px;
@@ -40,6 +43,11 @@
     .custom-token-amount {
       border-radius: 20px;
     }
+
+    @media (max-width: 768px) {
+      .col,div[class*="col-"],.btn{
+        width: 100%;
+      }    
   </style>
 
 </head>
@@ -72,7 +80,7 @@
     </div>
   </div>
 
-  <div class="wrapper" style="padding:5em">
+  <div class="wrapper" style="padding:5em 0.5em">
     <div class="content-wrapper d-flex align-items-center">
       <div class="container-fluid">
         <form class="custom-form" id="swapForm">
@@ -234,6 +242,18 @@
     Notiflix.Loading.init({
         svgColor: 'rgb(181, 137, 0)',
       });
+
+      Notiflix.Confirm.init({
+        messageColor:'rgb(131, 148, 150)',
+        titleColor:'rgb(255, 255, 255)',
+        backgroundColor: 'rgb(0, 43, 54)',
+        cancelButtonBackground:'rgb(131, 148, 150)',
+        okButtonBackground:'rgb(181, 137, 0)',
+        messageFontSize:'16px',
+        titleFontSize:'18px',
+        buttonsFontSize:'17px'
+
+      })
   </script>
 </body>
 

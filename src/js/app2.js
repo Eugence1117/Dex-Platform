@@ -80,7 +80,7 @@ App = {
 			if(!validator.form()){
 				return false;
 			} 
-            
+
             if(!await App.calculateAmount()){
                 $(this).attr("disabled",true);
             }else{
@@ -193,7 +193,25 @@ App = {
                         var tokens = [token];
                         var isSuccess = await App.authorizeContract(tokens);
                         if(isSuccess){
-                            await instance.swap(tokenA,tokenB,tokenAmount,{from:ethereum.selectedAddress}).catch(function(e){
+                            await instance.swap(tokenA,tokenB,tokenAmount,{from:ethereum.selectedAddress}).then(function(){
+                                Notiflix.Loading.remove();  
+                                $("select[name=tokenA]").trigger('change');
+                                return Notiflix.Confirm.show(
+                                    'Token Swap Successfully',
+                                    'Do you want to add the token to your metamask?',
+                                    'Yes',
+                                    'No',
+                                    function okCb() {
+                                        App.addNewToken(tokenB);
+                                        return true;
+                                    },
+                                    function cancelCb() {
+                                        return true;
+                                    },
+                                    {
+                                    },
+                                );  
+                            }).catch(function(e){
                                 Notiflix.Loading.remove();
                                 if(e.code == 4001){
                                     Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
@@ -202,24 +220,7 @@ App = {
                                     console.log(e);
                                     Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
                                 }
-                            });
-                            Notiflix.Loading.remove();  
-                            $("select[name=tokenA]").trigger('change');
-                            return Notiflix.Confirm.show(
-                                'Token Swap Successfully',
-                                'Do you want to add the token to your metamask?',
-                                'Yes',
-                                'No',
-                                function okCb() {
-                                    App.addNewToken(tokenB);
-                                    return true;
-                                },
-                                function cancelCb() {
-                                   return true;
-                                },
-                                {
-                                },
-                                );                            
+                            });                                                     
                         }
                         else{
                             Notiflix.Loading.remove();
@@ -272,30 +273,7 @@ App = {
                 return false;
             });
         }
-    },
-    checkBalances: function (token, amount) {
-        if (amount <= 0 || token == "") {
-            Notiflix.Notify.warning("Invalid Request");
-            return false;
-        }
-        else {
-            var instance;
-            
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.checkBalances.call(token, amount,{from:ethereum.selectedAddress}).catch(
-                    function (e) {
-                        console.log(e)
-                        Notiflix.Notify.failure(e.data.message);
-                    });
-            }).then(function (result) {
-                Notiflix.Notify.info("Result returned: " + result);
-            }).catch(function (e) {
-                console.log(e)
-                Notiflix.Notify.failure(e);
-            });        
-        }
-    },    
+    },   
     importToken:function(token,addToList){
         if(token == ""){
             Notiflix.Notify.warning("Invalid Request");
@@ -423,17 +401,7 @@ App = {
             console.error(error);
             return 0;
         })
-    },
-    checkTokenBalance:function(tokenAddress){
-        return App.contracts.dex.deployed().then(function(ins){
-            return ins.checkBalances.call(tokenAddress,{from:ethereum.selectedAddress});
-        }).then(result => {
-            return result.toNumber() > 0;
-        }).catch(error => {
-            console.error(error);
-            return false;
-        })
-    }    
+    },  
 }
 
 function getCookie(cname) {
