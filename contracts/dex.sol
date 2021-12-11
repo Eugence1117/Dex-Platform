@@ -97,7 +97,7 @@ contract dex{
         return tokenReserve * lpAmount / totalSupply;
     }
 
-    function withdrawFund(address pool, uint amount)public payable returns(uint,uint){ 
+    function withdrawFund(address pool, uint amount)public payable{ 
         require(isPoolExist(pool),"Pool is not exist.");
         ERC20Interface poolToken = ERC20Interface(liquidityPool[pool].poolToken);
         require(poolToken.balanceOf(msg.sender) >= amount,"Not enough amount");
@@ -114,8 +114,7 @@ contract dex{
         require(tokenA.transfer(msg.sender,token1Received),"Transaction failed.");
         require(tokenB.transfer(msg.sender,token2Received),"Transaction failed.");
 
-        require(poolToken.burn(msg.sender,amount));                
-        return (token1Received,token2Received);       
+        require(poolToken.burn(msg.sender,amount));                           
     }
 
     function isPoolExist(address _address) private view returns(bool){        
