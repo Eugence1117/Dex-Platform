@@ -60,7 +60,7 @@ contract Token is ERC20Interface, SafeMath {
     uint8 public decimals;
     uint public _totalSupply;
  
-    address deployer;
+    address public deployer;
 
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
