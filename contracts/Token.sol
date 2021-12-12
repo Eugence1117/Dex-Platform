@@ -36,6 +36,9 @@ interface ERC20Interface {
     function transfer(address to, uint tokens) external returns (bool success);
     function approve(address spender, uint tokens) external returns (bool success);
     function transferFrom(address from, address to, uint tokens) external returns (bool success);
+    function symbol() external view returns(string memory);
+    function name() external view returns(string memory);
+    function decimals() external view returns (uint8);
     function burn(address account, uint amount) external returns(bool success);
     function mint(address to, uint amount) external returns(bool success);
 
@@ -57,7 +60,8 @@ contract Token is ERC20Interface, SafeMath {
     uint8 public decimals;
     uint public _totalSupply;
  
-    address deployer;
+    address public deployer;
+
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
     
@@ -121,7 +125,7 @@ contract Token is ERC20Interface, SafeMath {
         require(false,"This token is not mintable.");
         return false;
     }
-    
+
     modifier isOwner(address account){
         require(deployer == account);
         _;
