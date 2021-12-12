@@ -351,33 +351,46 @@ App = {
             tokens.push(token);
 
             try{
-                await App.addToken(tokenA,tokenB);
-
-                await App.authorizeContract(tokens).then(async function(result) {
-                    if(result){                        
-                        var isSuccess = await App.contracts.dex.deployed().then(function(ins){
-                            return ins.fundLiquidityPool(tokenA,tokenB,amountA,{from:ethereum.selectedAddress}).then(result => {
-                                return true;
-                            })
-                        });
-                        Notiflix.Loading.remove();
-                        Notiflix.Notify.success("Transaction Completed.");                        
-                    }
-                    else{
-                        Notiflix.Loading.remove();
-                        Notiflix.Notify.failure("Error occured when authorizing contract.");
-                        return null;                
-                    }                   
+                const instance = await App.contracts.dex.deployed().then(function(ins){
+                    return ins;
                 })
-                .catch(function(error){
-                    Notiflix.Loading.remove();
-                    if(e.code == 4001){
-                        Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
-                    }                
-                    else{
-                        Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
+ 
+                instance.isPoolExist(tokenA,tokenB).then(async function(result){
+                    var isExist = result[0];
+                    var poolId = result[1];
+                    if(isExist){
+                        await App.authorizeContract(tokens).then(async function(result) {
+                            if(result){                        
+                                var isSuccess = await App.contracts.dex.deployed().then(function(ins){
+                                    return ins.fundLiquidityPool(tokenA,tokenB,amountA,{from:ethereum.selectedAddress}).then(result => {
+                                        return true;
+                                    })
+                                });
+                                Notiflix.Loading.remove(); 
+                                if(poolId != null){
+                                    await App.importPool(poolId,false);                    
+                                }                    
+                            }
+                            else{
+                                Notiflix.Loading.remove();
+                                Notiflix.Notify.failure("Error occured when authorizing contract.");
+                                return null;                
+                            }                   
+                        })
+                        .catch(function(error){
+                            Notiflix.Loading.remove();
+                            if(e.code == 4001){
+                                Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
+                            }                
+                            else{
+                                Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
+                            }
+                        });  
                     }
-                });  
+                    else{
+                        Notiflix.Notify.failure("Pool is not exist.");
+                    }
+                })                                               
             }
             catch(e){
                 Notiflix.Loading.remove();
@@ -403,35 +416,34 @@ App = {
                 var poolId = result[1];                
                 if(!isExist){     
                     Notiflix.Loading.circle("Waiting the transaction to finish...");
-                    return App.addToken(tokenA,tokenB).then(result => {                        
-                        var tokens = [];
+                    var tokens = [];
 
-                        var token = {};
-                        token.address = tokenA;
-                        token.amount = amountA;
+                    var token = {};
+                    token.address = tokenA;
+                    token.amount = amountA;
 
-                        tokens.push(token);
+                    tokens.push(token);
 
-                        token = {};
-                        token.address = tokenB;
-                        token.amount = amountB;
-                        tokens.push(token);
+                    token = {};
+                    token.address = tokenB;
+                    token.amount = amountB;
+                    tokens.push(token);
 
-                        return App.authorizeContract(tokens).then(result => {
-                            if(result){
-                                return instance.addLiquidityPool(tokenA,tokenB,amountA,amountB,{from:ethereum.selectedAddress}).then(result =>{
-                                    Notiflix.Loading.remove();      
-                                    Notiflix.Notify.success("Pool created.");                                                                           
-                                    return poolId;
-                                });                                
-                            }
-                            else{
-                                Notiflix.Loading.remove();                                             
-                                Notiflix.Notify.failure("Error occured when authorizing contract.");
-                                return null;
-                            }                               
-                        })
-                    });                
+                    return App.authorizeContract(tokens).then(async function(result){
+                        if(result){
+                            return await instance.addLiquidityPool(tokenA,tokenB,amountA,amountB,{from:ethereum.selectedAddress}).then(result =>{
+                                Notiflix.Loading.remove();      
+                                Notiflix.Notify.success("Pool created.");                                                                           
+                                return poolId;
+                            });                                
+                        }
+                        else{
+                            Notiflix.Loading.remove();                                             
+                            Notiflix.Notify.failure("Error occured when authorizing contract.");
+                            return null;
+                        }                               
+                    })                                
+                    //return App.addToken(tokenA,tokenB).then(result => {});                                                               
                 }
                 else{
                     console.log("Pool ID" + poolId);
@@ -700,8 +712,8 @@ App = {
             return false;
         }
         else {
-            var instance;
-            
+            var instance;           
+
             App.contracts.dex.deployed().then(function (ins) {
                 instance = ins;                
                 return instance.liquidityPool(poolAddress);
@@ -715,10 +727,6 @@ App = {
                     var poolToken = result[0];                                        
                     var tokenA = result[1];
                     var tokenB = result[2];               
-
-                    console.log("Pool Token" + poolToken);
-
-                    App.addNewToken(poolToken);
 
                     pool["balanceA"] = result[3];
                     pool["balanceB"] = result[4];
@@ -796,6 +804,20 @@ App = {
                             }
                             $(".withdrawBtn").off('click');
                             $(".withdrawBtn").on('click',withdrawHandler);
+
+                            Notiflix.Confirm.show(
+                                'Liquidity Pool has been imported',
+                                'Do you want to add the LP token to your metamask?',
+                                'Yes',
+                                'No',
+                                function okCb() {
+                                    App.addNewToken(poolToken);
+                                },
+                                function cancelCb() {
+                                },
+                                {
+                                },
+                            ); 
                         });
                     }).catch(function(e){
                         console.error("Invalid Token");
