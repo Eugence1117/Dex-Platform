@@ -1131,42 +1131,6 @@ App = {
             }            
         }
     },
-    calculateRatio:function(token1, token2){
-        if(token1 == token2 || token1 == "" || token2 == ""){
-            Notiflix.Notify.warning("Invalid Request");
-            return false;
-        }
-        else{
-            var instance;
-            
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.isPoolExist.call(token1,token2);
-            }).then(function (result) {
-                console.log(result);
-                var isExist = result[0];
-                var poolId = result[1];
-                if(isExist){
-                    const cookie = getCookie("tokens")
-                    if(cookie == ""){
-                        $.getJSON('../token.json', function(data) {   
-                            tokensBuffer = data;
-                            setCookie(data,"token");
-                        });
-                    }
-                    else{
-                        tokensBuffer = JSON.parse(cookie);
-                    }
-                }
-                else{
-                    //Show no pool
-                }                
-            }).catch(function (e) {
-                console.log(e)
-                Notiflix.Notify.failure(e);
-            }); 
-        }
-    },
     checkTokenBalance:function(tokenAddress){
         return App.contracts.dex.deployed().then(function(ins){
             return ins.checkBalances.call(tokenAddress,{from:ethereum.selectedAddress});
