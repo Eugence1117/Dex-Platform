@@ -30,7 +30,7 @@ npm-debug.log
 .env
 
 # truffle build directory
-build/
+build/contracts
 
 # macOS
 .DS_Store

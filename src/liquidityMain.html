@@ -25,7 +25,9 @@
                 -webkit-animation: .75s linear infinite spinner-border;
                 animation: .75s linear infinite spinner-border;
             }
-
+            .notiflix-confirm-buttons > a {
+                text-decoration: none;
+            }
             @media (max-width: 768px) {
                 .col,div[class*="col-"],.btn{
                     width: 100%;
@@ -549,5 +551,18 @@
             Notiflix.Loading.init({
                 svgColor: 'rgb(181, 137, 0)',
                 });
+
+
+            Notiflix.Confirm.init({
+                messageColor:'rgb(131, 148, 150)',
+                titleColor:'rgb(255, 255, 255)',
+                backgroundColor: 'rgb(0, 43, 54)',
+                cancelButtonBackground:'rgb(131, 148, 150)',
+                okButtonBackground:'rgb(181, 137, 0)',
+                messageFontSize:'16px',
+                titleFontSize:'18px',
+                buttonsFontSize:'17px'
+
+            })
         </script>
     </html>
