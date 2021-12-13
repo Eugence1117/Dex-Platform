@@ -28,7 +28,7 @@ contract SafeMath {
  
  
 //ERC Token Standard #20 Interface
- 
+//From https://docs.openzeppelin.com/contracts/2.x/api/token/erc20
 interface ERC20Interface {
     function totalSupply() external view returns (uint);    
     function balanceOf(address tokenOwner) external view returns (uint balance);
@@ -45,15 +45,7 @@ interface ERC20Interface {
     event Transfer(address indexed from, address indexed to, uint tokens);
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 }
- 
-// //Contract function to receive approval and execute function in one call
- 
-// contract ApproveAndCallFallBack {
-//     function receiveApproval(address from, uint256 tokens, address token, bytes memory data) public;
-// }
- 
-//Actual token contract
- 
+
 contract Token is ERC20Interface, SafeMath {
     string public symbol;
     string public  name;
@@ -130,12 +122,6 @@ contract Token is ERC20Interface, SafeMath {
         require(deployer == account);
         _;
     }
-    // function approveAndCall(address spender, uint tokens, bytes memory data) public virtual returns (bool) {
-    //     allowed[msg.sender][spender] = tokens;
-    //     emit Approval(msg.sender, spender, tokens);
-    //     ApproveAndCallFallBack(spender).receiveApproval(msg.sender, tokens, this, data);
-    //     return true;
-    // }
 }
 
 contract MintableToken is Token{

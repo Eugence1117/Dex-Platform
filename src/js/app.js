@@ -77,6 +77,13 @@ App = {
                     $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
                 }
                 $("#refreshPoolBtn .fas").removeClass("spin");
+                
+                $(".copy").off('click');
+                $(".copy").on('click',function(){
+                    var poolAddress = $(this).data("pool");
+                    navigator.clipboard.writeText(poolAddress);
+                    Notiflix.Notify.success("Pool Address copied.");
+                });
 
                 $(".withdrawBtn").on('click',withdrawHandler);
             }); 
@@ -91,17 +98,6 @@ App = {
         return App.bindEvents();
     },
     bindEvents: function () {
-        $("#checkPool").on('click', function () {
-            App.checkPoolAvailability("0xf171469d7cCdda0b7641e230e6a4c2eF98779e0e", "0x55B2DFc524b402b0E74Dc05543012ABc464f8ed1");
-        })
-        $("#checkToken").on('click', function () {
-            App.checkToken("0xf171469d7cCdda0b7641e230e6a4c2eF98779e0e");
-        })
-
-        $("#checkBalance").on('click', function () {
-            App.checkBalances("0xf171469d7cCdda0b7641e230e6a4c2eF98779e0e", 100);
-        })
-
         $("#refreshPoolBtn").on('click',async function(){
             await App.refreshPool().then(function(){
                 const cookie = getCookie("pools");
@@ -121,6 +117,13 @@ App = {
                 }
                 $(".withdrawBtn").off('click');
                 $(".withdrawBtn").on('click',withdrawHandler);
+
+                $(".copy").off('click');
+                $(".copy").on('click',function(){
+                    var poolAddress = $(this).data("pool");
+                    navigator.clipboard.writeText(poolAddress);
+                    Notiflix.Notify.success("Pool Address copied.");
+                });
                 $("#refreshPoolBtn .fas").removeClass("spin");
             });            
         })
@@ -134,18 +137,18 @@ App = {
             App.importPool($.trim($("#poolAddress").val()),true);
         })
 
-        $("#addTokenBtn").on("click",function(){
+        $("#addTokenBtn").on("click",async function(){
             var validator = $( "#addTokenForm" ).validate();
 			if(!validator.form()){
 				return false;
 			}    
             
-            var token = App.importToken($("#tokenAddress").val(),true);
+            var token = await App.importToken($("#tokenAddress").val(),true);
             if(token != null){
-                Notiflix.Notify.info("Token Added");
+                Notiflix.Notify.success("Token Added.");
             }
             else{
-                Notiflix.Notify.failure("Unable to add token");
+                Notiflix.Notify.failure("Unable to add token.");
             }
         })
 
@@ -240,7 +243,7 @@ App = {
             $("#withdrawModal .tokenBVal").text("0");
         })
 
-        var calculateFundAmount = async function(){            
+        var calculateFundAmount = async function(){  
             var tokenAAddress = $(this).siblings('.token').val();
             var tokenAmount = $(this).val();
             
@@ -336,8 +339,7 @@ App = {
             Notiflix.Notify.warning("Invalid Request. Validation Needed");
             return false;
         }
-        else {            
-            Notiflix.Loading.circle("Waiting the transaction to finish...");
+        else {                        
             var tokens = [];
 
             var token = {};
@@ -359,35 +361,47 @@ App = {
                     var isExist = result[0];
                     var poolId = result[1];
                     if(isExist){
-                        await App.authorizeContract(tokens).then(async function(result) {
-                            if(result){                        
-                                var isSuccess = await App.contracts.dex.deployed().then(function(ins){
-                                    return ins.fundLiquidityPool(tokenA,tokenB,amountA,{from:ethereum.selectedAddress}).then(result => {
-                                        return true;
-                                    })
-                                });
-                                Notiflix.Loading.remove(); 
-                                if(poolId != null){
-                                    await App.importPool(poolId,false);                    
-                                }                    
-                            }
-                            else{
+                        var tokenAbalance = (await instance.checkBalances.call(tokenA,{from:ethereum.selectedAddress})).toNumber();
+                        var tokenBbalance = (await instance.checkBalances.call(tokenB,{from:ethereum.selectedAddress})).toNumber();
+
+                        if(tokenAbalance >= amountA && tokenBbalance >= amountB){
+                            Notiflix.Loading.circle("Waiting the transaction to finish...");
+
+                            await App.authorizeContract(tokens).then(async function(result) {
+                                if(result){                        
+                                    var isSuccess = await App.contracts.dex.deployed().then(function(ins){
+                                        return ins.fundLiquidityPool(tokenA,tokenB,amountA,{from:ethereum.selectedAddress}).then(result => {
+                                            return true;
+                                        })
+                                    });
+                                    Notiflix.Loading.remove(); 
+                                    if(poolId != null){
+                                        await App.importPool(poolId,false);                    
+                                    }                    
+                                }
+                                else{
+                                    Notiflix.Loading.remove();
+                                    Notiflix.Notify.failure("Error occured when authorizing contract.");
+                                    return null;                
+                                }                   
+                            })
+                            .catch(function(error){
                                 Notiflix.Loading.remove();
-                                Notiflix.Notify.failure("Error occured when authorizing contract.");
-                                return null;                
-                            }                   
-                        })
-                        .catch(function(error){
-                            Notiflix.Loading.remove();
-                            if(e.code == 4001){
-                                Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
-                            }                
-                            else{
-                                Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
-                            }
-                        });  
+                                if(e.code == 4001){
+                                    Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
+                                }                
+                                else{
+                                    Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
+                                }
+                            }); 
+                        } 
+                        else{
+                            Notiflix.Loading.remove(); 
+                            Notiflix.Notify.failure("Not enough balance to perform this action.");
+                        }                        
                     }
                     else{
+                        Notiflix.Loading.remove(); 
                         Notiflix.Notify.failure("Pool is not exist.");
                     }
                 })                                               
@@ -411,11 +425,10 @@ App = {
             App.contracts.dex.deployed().then(function (ins) {
                 instance = ins;
                 return instance.isPoolExist.call(tokenA, tokenB);                    
-            }).then(function (result) {
+            }).then(async function (result) {
                 var isExist = result[0];
                 var poolId = result[1];                
-                if(!isExist){     
-                    Notiflix.Loading.circle("Waiting the transaction to finish...");
+                if(!isExist){                        
                     var tokens = [];
 
                     var token = {};
@@ -429,21 +442,30 @@ App = {
                     token.amount = amountB;
                     tokens.push(token);
 
-                    return App.authorizeContract(tokens).then(async function(result){
-                        if(result){
-                            return await instance.addLiquidityPool(tokenA,tokenB,amountA,amountB,{from:ethereum.selectedAddress}).then(result =>{
-                                Notiflix.Loading.remove();      
-                                Notiflix.Notify.success("Pool created.");                                                                           
-                                return poolId;
-                            });                                
-                        }
-                        else{
-                            Notiflix.Loading.remove();                                             
-                            Notiflix.Notify.failure("Error occured when authorizing contract.");
-                            return null;
-                        }                               
-                    })                                
-                    //return App.addToken(tokenA,tokenB).then(result => {});                                                               
+                    var tokenAbalance = (await instance.checkBalances.call(tokenA,{from:ethereum.selectedAddress})).toNumber();
+                    var tokenBbalance = (await instance.checkBalances.call(tokenB,{from:ethereum.selectedAddress})).toNumber();
+
+                    if(tokenAbalance >= amountA && tokenBbalance >= amountB){
+                        Notiflix.Loading.circle("Waiting the transaction to finish...");
+                        return App.authorizeContract(tokens).then(async function(result){
+                            if(result){
+                                return await instance.addLiquidityPool(tokenA,tokenB,amountA,amountB,{from:ethereum.selectedAddress}).then(result =>{
+                                    Notiflix.Loading.remove();      
+                                    Notiflix.Notify.success("Pool created.");                                                                           
+                                    return poolId;
+                                });                                
+                            }
+                            else{
+                                Notiflix.Loading.remove();                                             
+                                Notiflix.Notify.failure("Error occured when authorizing contract.");
+                                return null;
+                            }                               
+                        });                              
+                    }                    
+                    else{
+                        Notiflix.Loading.remove(); 
+                        Notiflix.Notify.failure("Not enough balance to perform this action.");
+                    }
                 }
                 else{
                     console.log("Pool ID" + poolId);
@@ -518,7 +540,6 @@ App = {
         }
         const token = App.tokens.get(pool.poolToken);
 
-        console.log("Balances"+balances)
         balances = balances / (10 ** token.decimal);
         
         const defaultValue = (0).toFixed(token.decimal);
@@ -603,74 +624,6 @@ App = {
             }
         }
     },
-    estSwap: function (tokenA, tokenB, amount) {        
-        if (tokenA == tokenB) {
-            Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
-        } else if (amount <= 0) {
-            Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
-        }
-        else {
-            var instance;
-
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.isPoolExist.call(tokenA, tokenB).catch(
-                    function (e) {
-                        Notiflix.Notify.failure(e.data.message);
-                    });
-            }).then(function (result) {
-                Notiflix.Notify.info(result);
-            }).catch(function (e) {
-                Notiflix.Notify.failure(e.data.message);
-            });
-        }
-    },
-    checkPoolAvailability: function (tokenA, tokenB) {
-        if (tokenA == tokenB) {
-            Notiflix.Notify.warning("Invalid Request");
-            return false;
-        }
-        else {
-            var instance;
-
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.isPoolExist.call(tokenA, tokenB).catch(
-                    function (e) {
-                        Notiflix.Notify.failure(e.data.message);
-                    });
-            }).then(function (result) {
-                Notiflix.Notify.info("Result returned: " + result);
-            }).catch(function (e) {
-                Notiflix.Notify.failure(e.data.message);
-            });
-        }
-    },
-    checkBalances: function (token, amount) {
-        if (amount <= 0 || token == "") {
-            Notiflix.Notify.warning("Invalid Request");
-            return false;
-        }
-        else {
-            var instance;
-            
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.checkBalances.call(token, amount,{from:ethereum.selectedAddress}).catch(
-                    function (e) {
-                        console.log(e)
-                        Notiflix.Notify.failure(e.data.message);
-                    });
-            }).then(function (result) {
-                Notiflix.Notify.info("Result returned: " + result);
-            }).catch(function (e) {
-                console.log(e)
-                Notiflix.Notify.failure(e);
-            });        
-        }
-    },
     refreshPool:async function(){
         if(poolAddress == ""){
             Notiflix.Notify.warning("Invalid Request");
@@ -719,10 +672,11 @@ App = {
                 return instance.liquidityPool(poolAddress);
             }).then(function (result) {
                 if(!result[5]){
-                    console.log("Pool Not Found");
-                    Notiflix.Notify.info("Pool Not Found.");
+                    Notiflix.Notify.failure("Pool Not Found.");
                 }
                 else{
+                    Notiflix.Loading.circle("Importing Pool...");
+
                     var pool = {};
                     var poolToken = result[0];                                        
                     var tokenA = result[1];
@@ -805,6 +759,15 @@ App = {
                             $(".withdrawBtn").off('click');
                             $(".withdrawBtn").on('click',withdrawHandler);
 
+                            $(".copy").off('click');
+                            $(".copy").on('click',function(){
+                                var poolAddress = $(this).data("pool");
+                                navigator.clipboard.writeText(poolAddress);
+                                Notiflix.Notify.success("Pool Address copied.");
+                            });
+
+                            Notiflix.Loading.remove();
+
                             Notiflix.Confirm.show(
                                 'Liquidity Pool has been imported',
                                 'Do you want to add the LP token to your metamask?',
@@ -820,6 +783,8 @@ App = {
                             ); 
                         });
                     }).catch(function(e){
+                        Notiflix.Loading.remove();
+                        Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
                         console.error("Invalid Token");
                     });                                                         
                 }
@@ -836,10 +801,11 @@ App = {
             return null;
         }
         else{
+            Notiflix.Loading.circle("Retrieving token information...");
             try{
                 return App.contracts.token.at(token).then(async function (ins) {
                     instance = ins;           
-    
+                    
                     try{
                         var symbol = await instance.symbol.call();    
                         var decimal = (await instance.decimals.call()).toNumber();
@@ -871,19 +837,26 @@ App = {
                             setCookie(tokens,"tokens")                        
                             refreshTokenList();
                         }                    
-    
+                        
+                        Notiflix.Loading.remove();
                         return objToken;
                     }
                     catch(e){
+                        Notiflix.Loading.remove();
+                        Notiflix.Notify.failure("Unexpected error ocurred. Please try again later.")
                         console.error(e);
                         return null;
                     }
                 }).catch(function(e){
+                    Notiflix.Notify.failure("Unexpected error ocurred. Please try again later.")
+                    Notiflix.Loading.remove();
                     console.error(e);
                     return null;
                 });
             }
             catch(e){
+                Notiflix.Loading.remove();
+                Notiflix.Notify.failure("Unexpected error ocurred. Please try again later.")
                 console.error(e);
                 return null;
             }            
@@ -1266,7 +1239,7 @@ function createPoolRecord(data){
     html += "<li class='list-group-item'>";
     html += "<div>"
     html += "<div class='heading'>";
-    html += "<h4>" + data.poolName + "</h4>";
+    html += "<h4>" + data.poolName + "<span class='fa-pull-right far fa-copy copy btn' data-pool='" + data.poolAddress + "'></span></h4>";
     html += "</div>";
     html += "<div class='body'>";
     html += "<div class='input-group input-group-lg mb-3'>"

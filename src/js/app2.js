@@ -120,7 +120,7 @@ App = {
             App.balance.set(tokenA,balance);
 
             if(balance < amount){
-                Notiflix.Notify.failure("Not enough amount");
+                Notiflix.Notify.failure("Not enough amount.");
             }
             else{
                 App.swapToken(tokenA,tokenB,amount);               

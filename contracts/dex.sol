@@ -3,6 +3,9 @@ pragma solidity ^0.8.0;
 
 import "./token.sol";
 
+//From <https://docs.uniswap.org/protocol/V2/concepts/core-concepts/pools>
+//From <https://medium.com/@austin_48503/%EF%B8%8F-minimum-viable-exchange-d84f30bd0c90>
+//From <https://docs.privacyswap.finance/guides/calculating-how-many-tokens-your-lps-are-worth>
 contract dex{
     struct Pool{
         address poolToken;
