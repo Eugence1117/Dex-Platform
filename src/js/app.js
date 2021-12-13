@@ -76,6 +76,7 @@ App = {
                 else{
                     $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
                 }
+
                 $("#refreshPoolBtn .fas").removeClass("spin");
                 
                 $(".copy").off('click');
@@ -83,6 +84,45 @@ App = {
                     var poolAddress = $(this).data("pool");
                     navigator.clipboard.writeText(poolAddress);
                     Notiflix.Notify.success("Pool Address copied.");
+                });
+
+                $(".remove").off('click');
+                $(".remove").on('click',function(){
+                    var poolAddress = $(this).data("pool");
+                    Notiflix.Confirm.show(
+                        'Remove Pool',
+                        'Are you sure to remove the pool from your list?',
+                        'Yes',
+                        'No',
+                        function okCb() {                            
+                            const cookie = getCookie("pools")
+                            if(cookie != ""){
+                                const pools = JSON.parse(cookie);      
+                                var newPools = [];
+
+                                $("#poolGroup").html("");
+                                for(var i = 0 ; i < pools.length;i++){
+                                    if(pools[i].poolAddress != poolAddress){
+                                        newPools.push(pools[i]);
+                                        App.pools.set(pools[i].poolAddress,pools[i]);
+                                        $("#poolGroup").append(createPoolRecord(pools[i]))   
+                                    }                            
+                                }                        
+                                if(newPools.length == 0){
+                                    $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
+                                }
+                                setCookie(newPools,"pools");
+                                Notiflix.Notify.success("Pool is removed from your list.");
+                            }
+                            else{
+                                Notiflix.Notify.failure("Unable to remove the pool from your list.");
+                            }
+                        },
+                        function cancelCb() {
+                        },
+                        {
+                        },
+                    );                     
                 });
 
                 $(".withdrawBtn").on('click',withdrawHandler);
@@ -123,6 +163,45 @@ App = {
                     var poolAddress = $(this).data("pool");
                     navigator.clipboard.writeText(poolAddress);
                     Notiflix.Notify.success("Pool Address copied.");
+                });
+
+                $(".remove").off('click');
+                $(".remove").on('click',function(){
+                    var poolAddress = $(this).data("pool");
+                    Notiflix.Confirm.show(
+                        'Remove Pool',
+                        'Are you sure to remove the pool from your list?',
+                        'Yes',
+                        'No',
+                        function okCb() {                            
+                            const cookie = getCookie("pools")
+                            if(cookie != ""){
+                                const pools = JSON.parse(cookie);      
+                                var newPools = [];
+
+                                $("#poolGroup").html("");
+                                for(var i = 0 ; i < pools.length;i++){
+                                    if(pools[i].poolAddress != poolAddress){
+                                        newPools.push(pools[i]);
+                                        App.pools.set(pools[i].poolAddress,pools[i]);
+                                        $("#poolGroup").append(createPoolRecord(pools[i]))   
+                                    }                            
+                                }                        
+                                if(newPools.length == 0){
+                                    $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
+                                }
+                                setCookie(newPools,"pools");
+                                Notiflix.Notify.success("Pool is removed from your list.");
+                            }
+                            else{
+                                Notiflix.Notify.failure("Unable to remove the pool from your list.");
+                            }
+                        },
+                        function cancelCb() {
+                        },
+                        {
+                        },
+                    );                     
                 });
                 $("#refreshPoolBtn .fas").removeClass("spin");
             });            
@@ -768,6 +847,45 @@ App = {
                                 Notiflix.Notify.success("Pool Address copied.");
                             });
 
+                            $(".remove").off('click');
+                            $(".remove").on('click',function(){
+                                var poolAddress = $(this).data("pool");
+                                Notiflix.Confirm.show(
+                                    'Remove Pool',
+                                    'Are you sure to remove the pool from your list?',
+                                    'Yes',
+                                    'No',
+                                    function okCb() {                                        
+                                        const cookie = getCookie("pools")
+                                        if(cookie != ""){
+                                            const pools = JSON.parse(cookie);      
+                                            var newPools = [];
+            
+                                            $("#poolGroup").html("");
+                                            for(var i = 0 ; i < pools.length;i++){
+                                                if(pools[i].poolAddress != poolAddress){
+                                                    newPools.push(pools[i]);
+                                                    App.pools.set(pools[i].poolAddress,pools[i]);
+                                                    $("#poolGroup").append(createPoolRecord(pools[i]))   
+                                                }                            
+                                            }                        
+                                            if(newPools.length == 0){
+                                                $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
+                                            }
+                                            setCookie(newPools,"pools");
+                                            Notiflix.Notify.success("Pool is removed from your list.");
+                                        }
+                                        else{
+                                            Notiflix.Notify.failure("Unable to remove the pool from your list.");
+                                        }
+                                    },
+                                    function cancelCb() {
+                                    },
+                                    {
+                                    },
+                                );                     
+                            });
+
                             Notiflix.Loading.remove();
 
                             Notiflix.Confirm.show(
@@ -1205,7 +1323,7 @@ function createPoolRecord(data){
     html += "<li class='list-group-item'>";
     html += "<div>"
     html += "<div class='heading'>";
-    html += "<h4>" + data.poolName + "<span class='fa-pull-right far fa-copy copy btn' data-pool='" + data.poolAddress + "'></span></h4>";
+    html += "<h4>" + data.poolName + "<div class='d-inline-block fa-pull-right'><span class='far fa-copy copy btn' data-pool='" + data.poolAddress + "'></span><span class='far fa-trash-alt remove btn' data-pool='" + data.poolAddress + "'></span></div></h4>";
     html += "</div>";
     html += "<div class='body'>";
     html += "<div class='input-group input-group-lg mb-3'>"
