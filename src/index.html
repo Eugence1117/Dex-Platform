@@ -48,6 +48,7 @@
       .col,div[class*="col-"],.btn{
         width: 100%;
       }    
+    }
   </style>
 
 </head>
@@ -156,15 +157,17 @@
   <script type="text/javascript" src="js/app2.js"></script>
   <script type="text/javascript" src="plugins/jquery-validator/jquery-validate-min.js"></script>
   <script type="text/javascript" src="js/validator-config.js"></script>
+
   <script>
     $(document).ready(function () {
       App.init();
       //initUI();
+      console.log(ethereum.isConnected());
       if (ethereum.isConnected()) {
         $("#connectWallet").text("Wallet Connected");
         $("#connectWallet").attr("disabled", true)
       }
-    })
+    });
 
     ethereum.on('accountsChanged', (accounts) => {
       if (accounts.length > 0) {
