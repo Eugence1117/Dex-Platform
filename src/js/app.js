@@ -77,6 +77,13 @@ App = {
                     $("#poolGroup").html("<div class='list-group-item'><p class='text-center p-2'>No Pool Available</p></div>");
                 }
                 $("#refreshPoolBtn .fas").removeClass("spin");
+                
+                $(".copy").off('click');
+                $(".copy").on('click',function(){
+                    var poolAddress = $(this).data("pool");
+                    navigator.clipboard.writeText(poolAddress);
+                    Notiflix.Notify.success("Pool Address copied.");
+                });
 
                 $(".withdrawBtn").on('click',withdrawHandler);
             }); 
@@ -121,6 +128,13 @@ App = {
                 }
                 $(".withdrawBtn").off('click');
                 $(".withdrawBtn").on('click',withdrawHandler);
+                
+                $(".copy").off('click');
+                $(".copy").on('click',function(){
+                    var poolAddress = $(this).data("pool");
+                    navigator.clipboard.writeText(poolAddress);
+                    Notiflix.Notify.success("Pool Address copied.");
+                });
                 $("#refreshPoolBtn .fas").removeClass("spin");
             });            
         })
@@ -805,6 +819,13 @@ App = {
                             $(".withdrawBtn").off('click');
                             $(".withdrawBtn").on('click',withdrawHandler);
 
+                            $(".copy").off('click');
+                            $(".copy").on('click',function(){
+                                var poolAddress = $(this).data("pool");
+                                navigator.clipboard.writeText(poolAddress);
+                                Notiflix.Notify.success("Pool Address copied.");
+                            });
+
                             Notiflix.Confirm.show(
                                 'Liquidity Pool has been imported',
                                 'Do you want to add the LP token to your metamask?',
@@ -1266,7 +1287,7 @@ function createPoolRecord(data){
     html += "<li class='list-group-item'>";
     html += "<div>"
     html += "<div class='heading'>";
-    html += "<h4>" + data.poolName + "</h4>";
+    html += "<h4>" + data.poolName + "<span class='fa-pull-right far fa-copy copy' data-pool='" + data.poolAddress + "'></span></h4>";
     html += "</div>";
     html += "<div class='body'>";
     html += "<div class='input-group input-group-lg mb-3'>"
