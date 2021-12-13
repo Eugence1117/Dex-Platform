@@ -526,7 +526,6 @@ App = {
         }
         const token = App.tokens.get(pool.poolToken);
 
-        console.log("Balances"+balances)
         balances = balances / (10 ** token.decimal);
         
         const defaultValue = (0).toFixed(token.decimal);
