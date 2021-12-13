@@ -339,8 +339,7 @@ App = {
             Notiflix.Notify.warning("Invalid Request. Validation Needed");
             return false;
         }
-        else {            
-            Notiflix.Loading.circle("Waiting the transaction to finish...");
+        else {                        
             var tokens = [];
 
             var token = {};
@@ -362,35 +361,47 @@ App = {
                     var isExist = result[0];
                     var poolId = result[1];
                     if(isExist){
-                        await App.authorizeContract(tokens).then(async function(result) {
-                            if(result){                        
-                                var isSuccess = await App.contracts.dex.deployed().then(function(ins){
-                                    return ins.fundLiquidityPool(tokenA,tokenB,amountA,{from:ethereum.selectedAddress}).then(result => {
-                                        return true;
-                                    })
-                                });
-                                Notiflix.Loading.remove(); 
-                                if(poolId != null){
-                                    await App.importPool(poolId,false);                    
-                                }                    
-                            }
-                            else{
+                        var tokenAbalance = (await instance.checkBalances.call(tokenA,{from:ethereum.selectedAddress})).toNumber();
+                        var tokenBbalance = (await instance.checkBalances.call(tokenB,{from:ethereum.selectedAddress})).toNumber();
+
+                        if(tokenAbalance >= amountA && tokenBbalance >= amountB){
+                            Notiflix.Loading.circle("Waiting the transaction to finish...");
+
+                            await App.authorizeContract(tokens).then(async function(result) {
+                                if(result){                        
+                                    var isSuccess = await App.contracts.dex.deployed().then(function(ins){
+                                        return ins.fundLiquidityPool(tokenA,tokenB,amountA,{from:ethereum.selectedAddress}).then(result => {
+                                            return true;
+                                        })
+                                    });
+                                    Notiflix.Loading.remove(); 
+                                    if(poolId != null){
+                                        await App.importPool(poolId,false);                    
+                                    }                    
+                                }
+                                else{
+                                    Notiflix.Loading.remove();
+                                    Notiflix.Notify.failure("Error occured when authorizing contract.");
+                                    return null;                
+                                }                   
+                            })
+                            .catch(function(error){
                                 Notiflix.Loading.remove();
-                                Notiflix.Notify.failure("Error occured when authorizing contract.");
-                                return null;                
-                            }                   
-                        })
-                        .catch(function(error){
-                            Notiflix.Loading.remove();
-                            if(e.code == 4001){
-                                Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
-                            }                
-                            else{
-                                Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
-                            }
-                        });  
+                                if(e.code == 4001){
+                                    Notiflix.Notify.failure("Action cancelled due to user rejected the transaction.");
+                                }                
+                                else{
+                                    Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
+                                }
+                            }); 
+                        } 
+                        else{
+                            Notiflix.Loading.remove(); 
+                            Notiflix.Notify.failure("Not enough balance to perform this action.");
+                        }                        
                     }
                     else{
+                        Notiflix.Loading.remove(); 
                         Notiflix.Notify.failure("Pool is not exist.");
                     }
                 })                                               
@@ -414,11 +425,10 @@ App = {
             App.contracts.dex.deployed().then(function (ins) {
                 instance = ins;
                 return instance.isPoolExist.call(tokenA, tokenB);                    
-            }).then(function (result) {
+            }).then(async function (result) {
                 var isExist = result[0];
                 var poolId = result[1];                
-                if(!isExist){     
-                    Notiflix.Loading.circle("Waiting the transaction to finish...");
+                if(!isExist){                        
                     var tokens = [];
 
                     var token = {};
@@ -432,21 +442,30 @@ App = {
                     token.amount = amountB;
                     tokens.push(token);
 
-                    return App.authorizeContract(tokens).then(async function(result){
-                        if(result){
-                            return await instance.addLiquidityPool(tokenA,tokenB,amountA,amountB,{from:ethereum.selectedAddress}).then(result =>{
-                                Notiflix.Loading.remove();      
-                                Notiflix.Notify.success("Pool created.");                                                                           
-                                return poolId;
-                            });                                
-                        }
-                        else{
-                            Notiflix.Loading.remove();                                             
-                            Notiflix.Notify.failure("Error occured when authorizing contract.");
-                            return null;
-                        }                               
-                    })                                
-                    //return App.addToken(tokenA,tokenB).then(result => {});                                                               
+                    var tokenAbalance = (await instance.checkBalances.call(tokenA,{from:ethereum.selectedAddress})).toNumber();
+                    var tokenBbalance = (await instance.checkBalances.call(tokenB,{from:ethereum.selectedAddress})).toNumber();
+
+                    if(tokenAbalance >= amountA && tokenBbalance >= amountB){
+                        Notiflix.Loading.circle("Waiting the transaction to finish...");
+                        return App.authorizeContract(tokens).then(async function(result){
+                            if(result){
+                                return await instance.addLiquidityPool(tokenA,tokenB,amountA,amountB,{from:ethereum.selectedAddress}).then(result =>{
+                                    Notiflix.Loading.remove();      
+                                    Notiflix.Notify.success("Pool created.");                                                                           
+                                    return poolId;
+                                });                                
+                            }
+                            else{
+                                Notiflix.Loading.remove();                                             
+                                Notiflix.Notify.failure("Error occured when authorizing contract.");
+                                return null;
+                            }                               
+                        });                              
+                    }                    
+                    else{
+                        Notiflix.Loading.remove(); 
+                        Notiflix.Notify.failure("Not enough balance to perform this action.");
+                    }
                 }
                 else{
                     console.log("Pool ID" + poolId);
