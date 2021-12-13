@@ -465,6 +465,7 @@ App = {
                     else{
                         Notiflix.Loading.remove(); 
                         Notiflix.Notify.failure("Not enough balance to perform this action.");
+                        return null;
                     }
                 }
                 else{
@@ -640,7 +641,7 @@ App = {
                     var pools = JSON.parse(cookie);
                     for (var i = 0; i < pools.length; i++) {
                         var pool = await instance.liquidityPool(pools[i].poolAddress);
-
+                        var tokenAddress = pool[0]
                         var balanceA = pool[3];
                         var balanceB = pool[4];
 
@@ -649,6 +650,7 @@ App = {
 
                         pools[i].balanceA = (balanceA / (10 ** tokenADecimal)).toFixed(tokenADecimal);
                         pools[i].balanceB = (balanceB / (10 ** tokenBDecimal)).toFixed(tokenBDecimal);
+                        pools[i].poolToken = tokenAddress;
 
                         App.pools.set(pools[i].poolAddress,pools[i]);
                     }                  
@@ -791,7 +793,7 @@ App = {
                 
             }).catch(function (e) {
                 console.log(e)
-                Notiflix.Notify.failure(e);
+                Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
             });                          
         }
     },
@@ -1127,42 +1129,6 @@ App = {
                 console.error(e);
                 return false;
             }            
-        }
-    },
-    calculateRatio:function(token1, token2){
-        if(token1 == token2 || token1 == "" || token2 == ""){
-            Notiflix.Notify.warning("Invalid Request");
-            return false;
-        }
-        else{
-            var instance;
-            
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.isPoolExist.call(token1,token2);
-            }).then(function (result) {
-                console.log(result);
-                var isExist = result[0];
-                var poolId = result[1];
-                if(isExist){
-                    const cookie = getCookie("tokens")
-                    if(cookie == ""){
-                        $.getJSON('../token.json', function(data) {   
-                            tokensBuffer = data;
-                            setCookie(data,"token");
-                        });
-                    }
-                    else{
-                        tokensBuffer = JSON.parse(cookie);
-                    }
-                }
-                else{
-                    //Show no pool
-                }                
-            }).catch(function (e) {
-                console.log(e)
-                Notiflix.Notify.failure(e);
-            }); 
         }
     },
     checkTokenBalance:function(tokenAddress){
