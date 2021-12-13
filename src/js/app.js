@@ -526,7 +526,6 @@ App = {
         }
         const token = App.tokens.get(pool.poolToken);
 
-        console.log("Balances"+balances)
         balances = balances / (10 ** token.decimal);
         
         const defaultValue = (0).toFixed(token.decimal);
@@ -611,74 +610,6 @@ App = {
             }
         }
     },
-    estSwap: function (tokenA, tokenB, amount) {        
-        if (tokenA == tokenB) {
-            Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
-        } else if (amount <= 0) {
-            Notiflix.Notify.warning("Invalid Request. Validation Needed");
-            return false;
-        }
-        else {
-            var instance;
-
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.isPoolExist.call(tokenA, tokenB).catch(
-                    function (e) {
-                        Notiflix.Notify.failure(e.data.message);
-                    });
-            }).then(function (result) {
-                Notiflix.Notify.info(result);
-            }).catch(function (e) {
-                Notiflix.Notify.failure(e.data.message);
-            });
-        }
-    },
-    checkPoolAvailability: function (tokenA, tokenB) {
-        if (tokenA == tokenB) {
-            Notiflix.Notify.warning("Invalid Request");
-            return false;
-        }
-        else {
-            var instance;
-
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.isPoolExist.call(tokenA, tokenB).catch(
-                    function (e) {
-                        Notiflix.Notify.failure(e.data.message);
-                    });
-            }).then(function (result) {
-                Notiflix.Notify.info("Result returned: " + result);
-            }).catch(function (e) {
-                Notiflix.Notify.failure(e.data.message);
-            });
-        }
-    },
-    checkBalances: function (token, amount) {
-        if (amount <= 0 || token == "") {
-            Notiflix.Notify.warning("Invalid Request");
-            return false;
-        }
-        else {
-            var instance;
-            
-            App.contracts.dex.deployed().then(function (ins) {
-                instance = ins;
-                return instance.checkBalances.call(token, amount,{from:ethereum.selectedAddress}).catch(
-                    function (e) {
-                        console.log(e)
-                        Notiflix.Notify.failure(e.data.message);
-                    });
-            }).then(function (result) {
-                Notiflix.Notify.info("Result returned: " + result);
-            }).catch(function (e) {
-                console.log(e)
-                Notiflix.Notify.failure(e);
-            });        
-        }
-    },
     refreshPool:async function(){
         if(poolAddress == ""){
             Notiflix.Notify.warning("Invalid Request");
@@ -727,8 +658,7 @@ App = {
                 return instance.liquidityPool(poolAddress);
             }).then(function (result) {
                 if(!result[5]){
-                    console.log("Pool Not Found");
-                    Notiflix.Notify.info("Pool Not Found.");
+                    Notiflix.Notify.failure("Pool Not Found.");
                 }
                 else{
                     Notiflix.Loading.circle("Importing Pool...");
