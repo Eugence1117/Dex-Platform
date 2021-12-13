@@ -98,17 +98,6 @@ App = {
         return App.bindEvents();
     },
     bindEvents: function () {
-        $("#checkPool").on('click', function () {
-            App.checkPoolAvailability("0xf171469d7cCdda0b7641e230e6a4c2eF98779e0e", "0x55B2DFc524b402b0E74Dc05543012ABc464f8ed1");
-        })
-        $("#checkToken").on('click', function () {
-            App.checkToken("0xf171469d7cCdda0b7641e230e6a4c2eF98779e0e");
-        })
-
-        $("#checkBalance").on('click', function () {
-            App.checkBalances("0xf171469d7cCdda0b7641e230e6a4c2eF98779e0e", 100);
-        })
-
         $("#refreshPoolBtn").on('click',async function(){
             await App.refreshPool().then(function(){
                 const cookie = getCookie("pools");
@@ -128,7 +117,7 @@ App = {
                 }
                 $(".withdrawBtn").off('click');
                 $(".withdrawBtn").on('click',withdrawHandler);
-                
+
                 $(".copy").off('click');
                 $(".copy").on('click',function(){
                     var poolAddress = $(this).data("pool");
@@ -148,18 +137,18 @@ App = {
             App.importPool($.trim($("#poolAddress").val()),true);
         })
 
-        $("#addTokenBtn").on("click",function(){
+        $("#addTokenBtn").on("click",async function(){
             var validator = $( "#addTokenForm" ).validate();
 			if(!validator.form()){
 				return false;
 			}    
             
-            var token = App.importToken($("#tokenAddress").val(),true);
+            var token = await App.importToken($("#tokenAddress").val(),true);
             if(token != null){
-                Notiflix.Notify.info("Token Added");
+                Notiflix.Notify.success("Token Added.");
             }
             else{
-                Notiflix.Notify.failure("Unable to add token");
+                Notiflix.Notify.failure("Unable to add token.");
             }
         })
 
@@ -254,7 +243,12 @@ App = {
             $("#withdrawModal .tokenBVal").text("0");
         })
 
-        var calculateFundAmount = async function(){            
+        var calculateFundAmount = async function(){  
+            var validator = $( "#addForm" ).validate();
+			if(!validator.form()){
+				return false;
+			}    
+
             var tokenAAddress = $(this).siblings('.token').val();
             var tokenAmount = $(this).val();
             
@@ -737,6 +731,8 @@ App = {
                     Notiflix.Notify.info("Pool Not Found.");
                 }
                 else{
+                    Notiflix.Loading.circle("Importing Pool...");
+
                     var pool = {};
                     var poolToken = result[0];                                        
                     var tokenA = result[1];
@@ -826,6 +822,8 @@ App = {
                                 Notiflix.Notify.success("Pool Address copied.");
                             });
 
+                            Notiflix.Loading.remove();
+
                             Notiflix.Confirm.show(
                                 'Liquidity Pool has been imported',
                                 'Do you want to add the LP token to your metamask?',
@@ -841,6 +839,8 @@ App = {
                             ); 
                         });
                     }).catch(function(e){
+                        Notiflix.Loading.remove();
+                        Notiflix.Notify.failure("Unexpected error occured. Please try again later.");
                         console.error("Invalid Token");
                     });                                                         
                 }
@@ -857,10 +857,11 @@ App = {
             return null;
         }
         else{
+            Notiflix.Loading.circle("Retrieving token information...");
             try{
                 return App.contracts.token.at(token).then(async function (ins) {
                     instance = ins;           
-    
+                    
                     try{
                         var symbol = await instance.symbol.call();    
                         var decimal = (await instance.decimals.call()).toNumber();
@@ -892,19 +893,26 @@ App = {
                             setCookie(tokens,"tokens")                        
                             refreshTokenList();
                         }                    
-    
+                        
+                        Notiflix.Loading.remove();
                         return objToken;
                     }
                     catch(e){
+                        Notiflix.Loading.remove();
+                        Notiflix.Notify.failure("Unexpected error ocurred. Please try again later.")
                         console.error(e);
                         return null;
                     }
                 }).catch(function(e){
+                    Notiflix.Notify.failure("Unexpected error ocurred. Please try again later.")
+                    Notiflix.Loading.remove();
                     console.error(e);
                     return null;
                 });
             }
             catch(e){
+                Notiflix.Loading.remove();
+                Notiflix.Notify.failure("Unexpected error ocurred. Please try again later.")
                 console.error(e);
                 return null;
             }            
@@ -1287,7 +1295,7 @@ function createPoolRecord(data){
     html += "<li class='list-group-item'>";
     html += "<div>"
     html += "<div class='heading'>";
-    html += "<h4>" + data.poolName + "<span class='fa-pull-right far fa-copy copy' data-pool='" + data.poolAddress + "'></span></h4>";
+    html += "<h4>" + data.poolName + "<span class='fa-pull-right far fa-copy copy btn' data-pool='" + data.poolAddress + "'></span></h4>";
     html += "</div>";
     html += "<div class='body'>";
     html += "<div class='input-group input-group-lg mb-3'>"
