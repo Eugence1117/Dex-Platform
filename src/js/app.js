@@ -244,11 +244,6 @@ App = {
         })
 
         var calculateFundAmount = async function(){  
-            var validator = $( "#addForm" ).validate();
-			if(!validator.form()){
-				return false;
-			}    
-
             var tokenAAddress = $(this).siblings('.token').val();
             var tokenAmount = $(this).val();
             
