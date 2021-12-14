@@ -458,6 +458,12 @@
                 $("input[name=poolAddress]").removeClass("is-invalid").removeClass("is-valid");
             })
 
+            $("#addTokenModal").on('hidden.bs.modal',function(){
+                //Clear Input Field
+                $("input[name=tokenAddress]").val("");
+                $("input[name=tokenAddress]").removeClass("is-invalid").removeClass("is-valid");
+            })
+
             $(".token").on('change',function(){
                 var previousToken = $(this).data("prev");                
                 
