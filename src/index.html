@@ -128,7 +128,8 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md-12 pt-3 pb-3"></div>
+                <div class="col-md-12 pt-3 pb-3">                  
+                </div>
               </div>
             </div>
 
@@ -159,9 +160,9 @@
   <script type="text/javascript" src="js/validator-config.js"></script>
 
   <script>
-    $(document).ready(function () {
-      App.init();
-      //initUI();
+    $(document).ready(async function () {
+      await App.init();
+      //initUI();      
       console.log(ethereum.isConnected());
       if (ethereum.isConnected()) {
         $("#connectWallet").text("Wallet Connected");
@@ -235,6 +236,7 @@
         if (tokenB.val() == tokenA.val()) {          
           tokenB.val(previousToken);
           App.retrieveTokenBalance.call();
+          App.calculateAmount.call();
           tokenB.data("prev", previousToken);
         }
       }

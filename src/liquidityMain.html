@@ -499,9 +499,9 @@
             // });
 
 
-            $(document).ready(function(){
-                App.init();
-                initUI();                
+            $(document).ready(async function(){                
+                await App.init();            
+                initUI();
                 if(ethereum.isConnected()){                    
                     $("#connectWallet").text("Wallet Connected");
                     $("#connectWallet").attr("disabled",true)
