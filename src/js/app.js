@@ -6,29 +6,31 @@ App = {
     pools:new Map(),
 
     init: async function () {
-        var tokensBuffer;
-        //Retrieve Token
-        const cookie = getCookie("tokens")
+
+        const cookie = await getCookie("tokens")
+        var tokensBuffer = [];
         if(cookie == ""){
-            $.getJSON('../token.json', function(data) {   
-                tokensBuffer = data;
-                setCookie(data,"tokens");
+            await $.getJSON('../token.json', function(data) {  
+                tokensBuffer = data;                                     
+                setCookie(data,"tokens");                
             });
         }
         else{
             tokensBuffer = JSON.parse(cookie);
         }
-        
-        var html = "";
-        for(var i = 0 ; i < tokensBuffer.length; i++){            
-            html += "<option value='" + tokensBuffer[i].address + "'>"+tokensBuffer[i].symbol+"</option>";
-            App.tokens.set(tokensBuffer[i].address,tokensBuffer[i]);
+                
+        if(tokensBuffer.length > 0){
+            var html = "";
+            for(var i = 0 ; i < tokensBuffer.length; i++){            
+                html += "<option value='" + tokensBuffer[i].address + "'>"+tokensBuffer[i].symbol+"</option>";
+                App.tokens.set(tokensBuffer[i].address,tokensBuffer[i]);
+            }
+            $(".token").html(html);        
+            $(".token").each(function(){
+                $(this).val(tokensBuffer[$(this).data("index")].address);
+                $(this).data("prev",$(this).val());
+            })
         }
-        $(".token").html(html);        
-        $(".token").each(function(){
-            $(this).val(tokensBuffer[$(this).data("index")].address);
-            $(this).data("prev",$(this).val());
-        })
         return await App.initWeb3();
     },
     initWeb3: async function () {
@@ -379,9 +381,7 @@ App = {
             inputElement.trigger('input');
         });
 
-        //FOR CREATE POOL AND FUND POOl, calculate when user enter value
-
-        //FOR WITHDRAW, after user entered amount to withdraw, calculate the value
+        return true;
     },
     retrieveAddedToken: function () {
         var instance;
