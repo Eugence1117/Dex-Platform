@@ -29,6 +29,7 @@ contract SafeMath {
  
 //ERC Token Standard #20 Interface
 //From https://docs.openzeppelin.com/contracts/2.x/api/token/erc20
+//From https://www.quicknode.com/guides/solidity/how-to-create-and-deploy-an-erc20-token
 interface ERC20Interface {
     function totalSupply() external view returns (uint);    
     function balanceOf(address tokenOwner) external view returns (uint balance);
