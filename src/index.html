@@ -161,7 +161,7 @@
 
   <script>
     $(document).ready(async function () {
-      console.log(await App.init());
+      await App.init();
       //initUI();      
       console.log(ethereum.isConnected());
       if (ethereum.isConnected()) {
