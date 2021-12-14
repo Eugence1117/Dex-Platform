@@ -102,6 +102,21 @@ App = {
                 $("input[name=amount]").attr("disabled",false);
             }
         });
+
+        $("select[name=tokenB]").on("change",async function(){
+            var validator = $( "#swapForm" ).validate();
+			if(!validator.form()){
+				return false;
+			} 
+
+            App.retrieveTokenBalance();
+            if(!await App.calculateAmount()){               
+                $("input[name=amount]").attr("disabled",true);
+            }
+            else{                
+                $("input[name=amount]").attr("disabled",false);
+            }
+        });
         
         $("#btnSwap").on('click',async function(e){            
             e.preventDefault();

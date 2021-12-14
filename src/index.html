@@ -128,7 +128,8 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md-12 pt-3 pb-3"></div>
+                <div class="col-md-12 pt-3 pb-3">                  
+                </div>
               </div>
             </div>
 
@@ -235,6 +236,7 @@
         if (tokenB.val() == tokenA.val()) {          
           tokenB.val(previousToken);
           App.retrieveTokenBalance.call();
+          App.calculateAmount.call();
           tokenB.data("prev", previousToken);
         }
       }
