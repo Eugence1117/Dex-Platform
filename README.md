@@ -9,6 +9,7 @@ Notification Plugins: https://notiflix.github.io/
 
 # Deployment Steps
 **Ganache** and **NodeJ**S is required for deployment.
+
 [Setup Guide.pdf](https://github.com/Eugence1117/Dex-Platform/files/8410514/Setup.Guide.pdf)
 
 
