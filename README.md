@@ -7,6 +7,9 @@ Theme Used: https://getbootstrap.com/
 
 Notification Plugins: https://notiflix.github.io/
 
+# Deployment Steps
+[Setup Guide.pdf](https://github.com/Eugence1117/Dex-Platform/files/8410514/Setup.Guide.pdf)
+
 
 # Sample Screenshot
 ![screencapture-localhost-3000-liquidityMain-html-2022-04-04-22_20_36](https://user-images.githubusercontent.com/68581819/161564651-abc835db-3cc9-48b9-bd2c-5c8909c42a8a.png)
